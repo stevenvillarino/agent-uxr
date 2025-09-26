@@ -1,0 +1,15 @@
+Interviewer: Thanks for joining today. Can you tell me about your experience using our new dashboard?
+
+User 1: Of course. Overall, it's a big improvement. I really like the new layout; it feels much cleaner. Finding the key metrics is a lot faster now.
+
+Interviewer: That's great to hear. Is there anything you found confusing or difficult?
+
+User 1: Well, the "Advanced Filters" section was a bit tricky. It wasn't immediately obvious how to apply more than one filter at a time. I had to click around a few times to figure out that I needed to hit "apply" after each selection, which felt a bit clunky.
+
+Interviewer: I see. So the filtering interaction wasn't intuitive. What about the new reporting feature?
+
+User 1: Oh, that's my favorite part. Being able to export the charts directly to a PDF is a huge time-saver for me. I used to have to take screenshots and paste them into a document, so this is fantastic.
+
+Interviewer: Wonderful. Any final thoughts or suggestions?
+
+User 1: Just one small thing. It would be nice if the date range selector remembered my last selection. I often run the same report for different date ranges, and it would save a click or two. But that's a minor nitpick. Overall, great job.
