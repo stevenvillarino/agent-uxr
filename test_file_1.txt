@@ -1,0 +1,19 @@
+Interviewer: Good morning, thank you for participating in our user research session today. Can you start by telling me about your role?
+
+Participant: Hi! I'm a UX designer at a fintech startup. I work primarily on our mobile banking app and web dashboard.
+
+Interviewer: Perfect. We'd like to get your feedback on our new design system. What are your first impressions when you look at this interface?
+
+Participant: The visual hierarchy is quite clear, which I appreciate. The color palette feels professional and trustworthy - that's crucial for financial products. However, I notice the button styles aren't entirely consistent across different sections.
+
+Interviewer: Can you elaborate on the consistency issues you mentioned?
+
+Participant: Sure. In the header section, I see rounded buttons with subtle shadows, but in the main content area, the buttons are flat with sharper corners. It creates a bit of visual disconnect for users.
+
+Interviewer: That's very helpful feedback. How about the typography? Does it feel appropriate for our target audience?
+
+Participant: The font choices are good - very readable and accessible. The hierarchy is clear with proper contrast ratios. I'd say the line spacing could be slightly increased for better readability, especially in dense content areas.
+
+Interviewer: Excellent observations. Is there anything specific you'd like to see improved in this design system?
+
+Participant: I'd love to see more comprehensive component documentation. Having clear usage guidelines and interactive examples would really help teams implement the system consistently across different products.

@@ -2,6 +2,10 @@ import os
 import json
 import argparse
 from openai import OpenAI
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Initialize the OpenAI client
 # Assumes OPENAI_API_KEY environment variable is set
