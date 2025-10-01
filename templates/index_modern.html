@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InsightDeck Agent - Research to Presentation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        border: "hsl(214.3 31.8% 91.4%)",
+                        input: "hsl(214.3 31.8% 91.4%)",
+                        ring: "hsl(222.2 84% 4.9%)",
+                        background: "hsl(0 0% 100%)",
+                        foreground: "hsl(222.2 84% 4.9%)",
+                        primary: {
+                            DEFAULT: "hsl(222.2 47.4% 11.2%)",
+                            foreground: "hsl(210 40% 98%)",
+                        },
+                        secondary: {
+                            DEFAULT: "hsl(210 40% 96%)",
+                            foreground: "hsl(222.2 84% 4.9%)",
+                        },
+                        muted: {
+                            DEFAULT: "hsl(210 40% 96%)",
+                            foreground: "hsl(215.4 16.3% 46.9%)",
+                        },
+                        accent: {
+                            DEFAULT: "hsl(210 40% 96%)",
+                            foreground: "hsl(222.2 84% 4.9%)",
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen font-sans">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">🎯 InsightDeck Agent</h1>
+            <p class="text-lg text-gray-600 mb-6">Transform your research transcripts into presentation-ready insights automatically using AI</p>
+            
+            <!-- Navigation -->
+            <div class="flex justify-center space-x-4 mb-8">
+                <a href="/" class="inline-flex items-center px-4 py-2 rounded-md bg-black text-white text-sm font-medium hover:bg-gray-800 transition-colors">
+                    🏠 Home
+                </a>
+                <a href="/settings" class="inline-flex items-center px-4 py-2 rounded-md border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors">
+                    ⚙️ Settings
+                </a>
+            </div>
+        </div>
+
+        <div id="main-form">
+            <!-- Title Input -->
+            <div class="bg-white rounded-lg border shadow-sm p-6 mb-6">
+                <label for="presentationTitle" class="block text-sm font-medium text-gray-700 mb-2">
+                    📊 Presentation Title
+                </label>
+                <input 
+                    type="text" 
+                    id="presentationTitle" 
+                    name="presentationTitle"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                    placeholder="e.g., User Interview Insights - Dashboard Study"
+                    value="Research Insights">
+            </div>
+
+            <!-- Transcription Service -->
+            <div class="bg-white rounded-lg border shadow-sm p-6 mb-6">
+                <h3 class="text-sm font-medium text-gray-700 mb-4">🎙️ Transcription Service</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- OpenAI Whisper -->
+                    <div class="relative">
+                        <input type="radio" id="service-whisper" name="transcriptionService" value="whisper" checked class="peer sr-only">
+                        <label for="service-whisper" 
+                               class="flex flex-col p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 peer-checked:border-black peer-checked:bg-black peer-checked:text-white transition-all">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-semibold">🆓 OpenAI Whisper (Free)</span>
+                                <span class="px-2 py-1 text-xs rounded-full peer-checked:bg-white peer-checked:text-black bg-green-100 text-green-800">
+                                    FREE
+                                </span>
+                            </div>
+                            <p class="text-sm opacity-75 mb-2">High-quality transcription, no speaker separation</p>
+                            <div class="text-xs space-y-1">
+                                <div>✅ Excellent accuracy</div>
+                                <div>❌ No speaker diarization</div>
+                            </div>
+                        </label>
+                    </div>
+                    
+                    <!-- ElevenLabs -->
+                    <div class="relative">
+                        <input type="radio" id="service-elevenlabs" name="transcriptionService" value="elevenlabs" class="peer sr-only">
+                        <label for="service-elevenlabs" 
+                               class="flex flex-col p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 peer-checked:border-black peer-checked:bg-black peer-checked:text-white transition-all">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-semibold">🎯 ElevenLabs (Premium)</span>
+                                <span class="px-2 py-1 text-xs rounded-full peer-checked:bg-white peer-checked:text-black bg-blue-100 text-blue-800">
+                                    $0.30/hour
+                                </span>
+                            </div>
+                            <p class="text-sm opacity-75 mb-2">Advanced transcription with speaker separation</p>
+                            <div class="text-xs space-y-1">
+                                <div>✅ Great accuracy</div>
+                                <div>✅ Up to 32 speakers</div>
+                                <div>✅ Audio events</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- File Upload -->
+            <div class="bg-white rounded-lg border shadow-sm p-6 mb-6">
+                <h3 class="text-sm font-medium text-gray-700 mb-4">📁 Upload Files</h3>
+                
+                <!-- Upload Mode Toggle -->
+                <div class="flex space-x-4 mb-4">
+                    <button type="button" id="single-mode" 
+                            class="px-4 py-2 rounded-md bg-black text-white text-sm font-medium transition-colors">
+                        📄 Single File
+                    </button>
+                    <button type="button" id="batch-mode" 
+                            class="px-4 py-2 rounded-md border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors">
+                        📚 Batch Processing
+                    </button>
+                </div>
+
+                <!-- Single File Upload -->
+                <div id="single-upload" class="upload-area">
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center hover:border-gray-400 transition-colors cursor-pointer"
+                         onclick="document.getElementById('fileInput').click()">
+                        <div class="text-4xl mb-4">📄</div>
+                        <p class="text-lg font-medium text-gray-700 mb-2">Click to upload or drag & drop your file</p>
+                        <p class="text-sm text-gray-500">
+                            <strong>Text:</strong> .txt files up to 10MB<br>
+                            <strong>Audio:</strong> .mp3, .wav, .m4a, .mp4 files up to 25MB
+                        </p>
+                    </div>
+                    <input type="file" id="fileInput" accept=".txt,.mp3,.wav,.m4a,.mp4" style="display: none;">
+                    <div id="file-info" class="mt-4 p-3 bg-green-50 border border-green-200 rounded-md hidden">
+                        <span id="file-details"></span>
+                    </div>
+                </div>
+
+                <!-- Batch Upload (initially hidden) -->
+                <div id="batch-upload" class="hidden">
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center hover:border-gray-400 transition-colors cursor-pointer"
+                         onclick="document.getElementById('batchFileInput').click()">
+                        <div class="text-4xl mb-4">📚</div>
+                        <p class="text-lg font-medium text-gray-700 mb-2">Select multiple files for batch processing</p>
+                        <p class="text-sm text-gray-500">Choose multiple .txt or audio files</p>
+                    </div>
+                    <input type="file" id="batchFileInput" multiple accept=".txt,.mp3,.wav,.m4a,.mp4" style="display: none;">
+                    <div id="batch-file-list" class="mt-4 space-y-2"></div>
+                </div>
+            </div>
+
+            <!-- OR Divider -->
+            <div class="flex items-center my-8">
+                <div class="flex-grow border-t border-gray-300"></div>
+                <span class="px-4 text-gray-500 font-medium">OR</span>
+                <div class="flex-grow border-t border-gray-300"></div>
+            </div>
+
+            <!-- Demo Section -->
+            <div class="bg-white rounded-lg border shadow-sm p-6 mb-6">
+                <h3 class="text-sm font-medium text-gray-700 mb-2">🎯 Try a Demo</h3>
+                <p class="text-gray-600 mb-4">See InsightDeck in action with sample transcripts from real-world scenarios</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <button onclick="loadSampleData('user_interview')" 
+                            class="demo-btn p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all">
+                        <div class="flex items-start space-x-3">
+                            <span class="text-2xl">👤</span>
+                            <div>
+                                <h4 class="font-medium text-gray-900">User Interview</h4>
+                                <p class="text-sm text-gray-600">Dashboard usability study with participant feedback</p>
+                            </div>
+                        </div>
+                    </button>
+                    
+                    <button onclick="loadSampleData('focus_group')" 
+                            class="demo-btn p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all">
+                        <div class="flex items-start space-x-3">
+                            <span class="text-2xl">👥</span>
+                            <div>
+                                <h4 class="font-medium text-gray-900">Focus Group</h4>
+                                <p class="text-sm text-gray-600">Mobile app feature discussion with multiple participants</p>
+                            </div>
+                        </div>
+                    </button>
+                    
+                    <button onclick="loadSampleData('support_call')" 
+                            class="demo-btn p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all">
+                        <div class="flex items-start space-x-3">
+                            <span class="text-2xl">📞</span>
+                            <div>
+                                <h4 class="font-medium text-gray-900">Support Call</h4>
+                                <p class="text-sm text-gray-600">Customer service interaction resolution</p>
+                            </div>
+                        </div>
+                    </button>
+                    
+                    <button onclick="loadSampleData('team_standup')" 
+                            class="demo-btn p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all">
+                        <div class="flex items-start space-x-3">
+                            <span class="text-2xl">💼</span>
+                            <div>
+                                <h4 class="font-medium text-gray-900">Team Standup</h4>
+                                <p class="text-sm text-gray-600">Development team progress and coordination</p>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- OR Divider -->
+            <div class="flex items-center my-8">
+                <div class="flex-grow border-t border-gray-300"></div>
+                <span class="px-4 text-gray-500 font-medium">OR</span>
+                <div class="flex-grow border-t border-gray-300"></div>
+            </div>
+
+            <!-- Text Input -->
+            <div class="bg-white rounded-lg border shadow-sm p-6 mb-8">
+                <label for="transcriptText" class="block text-sm font-medium text-gray-700 mb-2">
+                    ✍️ Paste Transcript Text Directly
+                </label>
+                <textarea 
+                    id="transcriptText" 
+                    name="transcriptText"
+                    rows="10"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                    placeholder="Paste your research transcript here...
+
+Example:
+Interviewer: Thanks for joining today. Can you tell me about your experience using our new dashboard?
+
+User: Overall, it's a big improvement. I really like the new layout; it feels much cleaner..."></textarea>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="text-center">
+                <button id="generate-btn" onclick="generatePresentation()" 
+                        class="inline-flex items-center px-8 py-3 bg-black text-white font-medium rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 transition-colors">
+                    🚀 Generate Presentation Insights
+                </button>
+            </div>
+        </div>
+
+        <!-- Processing Status (hidden by default) -->
+        <div id="processing-status" class="bg-white rounded-lg border shadow-sm p-6 mb-6 hidden">
+            <div class="flex items-center space-x-4 mb-6">
+                <div class="flex space-x-1">
+                    <div class="w-3 h-3 bg-black rounded-full animate-pulse"></div>
+                    <div class="w-3 h-3 bg-black rounded-full animate-pulse" style="animation-delay: 0.1s"></div>
+                    <div class="w-3 h-3 bg-black rounded-full animate-pulse" style="animation-delay: 0.2s"></div>
+                </div>
+                <p class="text-gray-700 font-medium" id="processing-text">Processing your transcript...</p>
+            </div>
+            
+            <!-- Progress Steps -->
+            <div class="grid grid-cols-5 gap-4">
+                <div class="text-center">
+                    <div id="step-1" class="w-8 h-8 rounded-full bg-gray-200 mx-auto mb-2 flex items-center justify-center">
+                        <span class="text-sm">1</span>
+                    </div>
+                    <p class="text-xs text-gray-600">Reading Content</p>
+                </div>
+                <div class="text-center">
+                    <div id="step-2" class="w-8 h-8 rounded-full bg-gray-200 mx-auto mb-2 flex items-center justify-center">
+                        <span class="text-sm">2</span>
+                    </div>
+                    <p class="text-xs text-gray-600">Transcribing Audio</p>
+                </div>
+                <div class="text-center">
+                    <div id="step-3" class="w-8 h-8 rounded-full bg-gray-200 mx-auto mb-2 flex items-center justify-center">
+                        <span class="text-sm">3</span>
+                    </div>
+                    <p class="text-xs text-gray-600">AI Analysis</p>
+                </div>
+                <div class="text-center">
+                    <div id="step-4" class="w-8 h-8 rounded-full bg-gray-200 mx-auto mb-2 flex items-center justify-center">
+                        <span class="text-sm">4</span>
+                    </div>
+                    <p class="text-xs text-gray-600">Creating Slides</p>
+                </div>
+                <div class="text-center">
+                    <div id="step-5" class="w-8 h-8 rounded-full bg-gray-200 mx-auto mb-2 flex items-center justify-center">
+                        <span class="text-sm">✓</span>
+                    </div>
+                    <p class="text-xs text-gray-600">Ready!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section (hidden by default) -->
+        <div id="results-section" class="space-y-6 hidden">
+            <div class="text-center mb-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">✅ Presentation Generated Successfully!</h2>
+            </div>
+
+            <!-- Discussion Section -->
+            <div class="bg-white rounded-lg border shadow-sm p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">🗣️ Here's the Discussion</h3>
+                    <button id="toggle-discussion" onclick="toggleDiscussion()" 
+                            class="text-sm text-gray-600 hover:text-gray-800 transition-colors">
+                        Show Less
+                    </button>
+                </div>
+                <div id="discussion-content" class="bg-gray-50 rounded-lg p-4 mb-4">
+                    <div id="full-transcript" class="text-gray-700 text-sm leading-relaxed max-h-40 overflow-y-auto"></div>
+                </div>
+                <div id="discussion-stats" class="text-xs text-gray-500"></div>
+            </div>
+
+            <!-- Analysis Results -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Processing Details -->
+                <div class="bg-white rounded-lg border shadow-sm p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">📊 Processing Details</h3>
+                    <div id="processing-details" class="space-y-3 text-sm"></div>
+                </div>
+
+                <!-- Executive Summary -->
+                <div class="bg-white rounded-lg border shadow-sm p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">📋 Executive Summary</h3>
+                    <div id="executive-summary" class="text-gray-700 text-sm leading-relaxed"></div>
+                </div>
+            </div>
+
+            <!-- Key Themes -->
+            <div class="bg-white rounded-lg border shadow-sm p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">🔍 Key Themes Identified</h3>
+                <div id="key-themes" class="space-y-2"></div>
+            </div>
+
+            <!-- Advanced Download Section -->
+            <div class="bg-white rounded-lg border shadow-sm p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-6">📥 Download Your Presentation</h3>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    <!-- Format Selection -->
+                    <div>
+                        <h4 class="font-medium text-gray-700 mb-4">Choose Format:</h4>
+                        <div class="space-y-3">
+                            <div class="relative">
+                                <input type="radio" id="format-markdown" name="exportFormat" value="markdown" checked class="peer sr-only">
+                                <label for="format-markdown" 
+                                       class="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 peer-checked:border-black peer-checked:bg-gray-50 transition-all">
+                                    <span class="text-xl mr-3">📝</span>
+                                    <div>
+                                        <div class="font-medium">Markdown</div>
+                                        <div class="text-sm text-gray-600">Marp-compatible slides</div>
+                                    </div>
+                                </label>
+                            </div>
+                            
+                            <div class="relative">
+                                <input type="radio" id="format-html" name="exportFormat" value="html" class="peer sr-only">
+                                <label for="format-html" 
+                                       class="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 peer-checked:border-black peer-checked:bg-gray-50 transition-all">
+                                    <span class="text-xl mr-3">🌐</span>
+                                    <div>
+                                        <div class="font-medium">HTML</div>
+                                        <div class="text-sm text-gray-600">Standalone web presentation</div>
+                                    </div>
+                                </label>
+                            </div>
+                            
+                            <div class="relative">
+                                <input type="radio" id="format-json" name="exportFormat" value="json" class="peer sr-only">
+                                <label for="format-json" 
+                                       class="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 peer-checked:border-black peer-checked:bg-gray-50 transition-all">
+                                    <span class="text-xl mr-3">📊</span>
+                                    <div>
+                                        <div class="font-medium">JSON</div>
+                                        <div class="text-sm text-gray-600">Structured data export</div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Template Selection -->
+                    <div>
+                        <h4 class="font-medium text-gray-700 mb-4">Choose Template:</h4>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="relative">
+                                <input type="radio" id="template-professional" name="exportTemplate" value="professional" checked class="peer sr-only">
+                                <label for="template-professional" 
+                                       class="block p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 peer-checked:border-black peer-checked:bg-gray-50 transition-all text-center">
+                                    <div class="font-medium">Professional</div>
+                                    <div class="text-xs text-gray-600 mt-1">Corporate & business focused</div>
+                                </label>
+                            </div>
+                            
+                            <div class="relative">
+                                <input type="radio" id="template-creative" name="exportTemplate" value="creative" class="peer sr-only">
+                                <label for="template-creative" 
+                                       class="block p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 peer-checked:border-black peer-checked:bg-gray-50 transition-all text-center">
+                                    <div class="font-medium">Creative</div>
+                                    <div class="text-xs text-gray-600 mt-1">Vibrant & engaging design</div>
+                                </label>
+                            </div>
+                            
+                            <div class="relative">
+                                <input type="radio" id="template-minimal" name="exportTemplate" value="minimal" class="peer sr-only">
+                                <label for="template-minimal" 
+                                       class="block p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 peer-checked:border-black peer-checked:bg-gray-50 transition-all text-center">
+                                    <div class="font-medium">Minimal</div>
+                                    <div class="text-xs text-gray-600 mt-1">Clean & simple layout</div>
+                                </label>
+                            </div>
+                            
+                            <div class="relative">
+                                <input type="radio" id="template-academic" name="exportTemplate" value="academic" class="peer sr-only">
+                                <label for="template-academic" 
+                                       class="block p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 peer-checked:border-black peer-checked:bg-gray-50 transition-all text-center">
+                                    <div class="font-medium">Academic</div>
+                                    <div class="text-xs text-gray-600 mt-1">Research & educational style</div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Download Actions -->
+                <div class="flex flex-col sm:flex-row gap-4 items-center justify-between">
+                    <div class="flex space-x-4">
+                        <button onclick="downloadCustomFormat()" 
+                                class="px-6 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors">
+                            📥 Download Selected Format
+                        </button>
+                        <button onclick="downloadAllFormats()" 
+                                class="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors">
+                            📦 Download All Formats
+                        </button>
+                    </div>
+                    
+                    <div class="flex items-center space-x-2 text-sm text-gray-600">
+                        <span>Quick downloads:</span>
+                        <a id="quick-download-link" href="#" 
+                           class="text-black hover:underline font-medium">
+                            📝 Original Markdown
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentResults = null;
+
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            setupUploadModeToggle();
+            setupFileUpload();
+        });
+
+        // Upload Mode Toggle
+        function setupUploadModeToggle() {
+            const singleMode = document.getElementById('single-mode');
+            const batchMode = document.getElementById('batch-mode');
+            const singleUpload = document.getElementById('single-upload');
+            const batchUpload = document.getElementById('batch-upload');
+
+            singleMode.addEventListener('click', () => {
+                singleMode.className = 'px-4 py-2 rounded-md bg-black text-white text-sm font-medium transition-colors';
+                batchMode.className = 'px-4 py-2 rounded-md border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors';
+                singleUpload.classList.remove('hidden');
+                batchUpload.classList.add('hidden');
+            });
+
+            batchMode.addEventListener('click', () => {
+                batchMode.className = 'px-4 py-2 rounded-md bg-black text-white text-sm font-medium transition-colors';
+                singleMode.className = 'px-4 py-2 rounded-md border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors';
+                batchUpload.classList.remove('hidden');
+                singleUpload.classList.add('hidden');
+            });
+        }
+
+        // File Upload Setup
+        function setupFileUpload() {
+            const fileInput = document.getElementById('fileInput');
+            const fileInfo = document.getElementById('file-info');
+            const fileDetails = document.getElementById('file-details');
+            const uploadArea = document.querySelector('#single-upload .cursor-pointer');
+
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    fileDetails.textContent = `Selected: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+                    fileInfo.classList.remove('hidden');
+                    // Clear text input when file is selected
+                    document.getElementById('transcriptText').value = '';
+                }
+            });
+
+            // Drag and drop
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('border-black');
+            });
+
+            uploadArea.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('border-black');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('border-black');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    fileInput.files = files;
+                    const file = files[0];
+                    fileDetails.textContent = `Selected: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+                    fileInfo.classList.remove('hidden');
+                    document.getElementById('transcriptText').value = '';
+                }
+            });
+
+            // Clear file when text is entered
+            document.getElementById('transcriptText').addEventListener('input', function() {
+                if (this.value.trim()) {
+                    fileInput.value = '';
+                    fileInfo.classList.add('hidden');
+                }
+            });
+        }
+
+        // Sample Data Loading
+        function loadSampleData(type) {
+            const samples = {
+                'user_interview': {
+                    title: 'User Interview - Dashboard Study',
+                    content: `Interviewer: Thanks for joining today. Can you tell me about your experience using our new dashboard?
+
+User: Overall, it's a big improvement. I really like the new layout; it feels much cleaner than before. The navigation is more intuitive, and I can find what I need faster.
+
+Interviewer: That's great to hear! Are there any specific features that stood out to you?
+
+User: Yes, the new search functionality is excellent. It actually understands what I'm looking for, and the filters work really well. The data visualization has also improved significantly - the charts are much clearer and more interactive.
+
+Interviewer: Were there any challenges or areas where you felt the dashboard could be improved?
+
+User: Well, there are a few things. The loading time is still a bit slow, especially when switching between different data views. Also, I'd love to have more customization options for the dashboard layout. Sometimes I wish I could rearrange the widgets to better suit my workflow.
+
+Interviewer: Those are valuable insights. How do you think these improvements would impact your daily work?
+
+User: If the performance issues were resolved and we had more customization options, I think it would significantly boost productivity. The dashboard is already helping me make better data-driven decisions, but these enhancements would make it even more powerful.`
+                },
+                'focus_group': {
+                    title: 'Focus Group - Mobile App Features',
+                    content: `Moderator: Let's discuss the new mobile app features. What are your first impressions?
+
+Participant 1: I love the dark mode option. It's much easier on the eyes, especially when using it in the evening.
+
+Participant 2: The notifications are too frequent though. I get interrupted constantly.
+
+Participant 3: I agree with the notifications issue, but I really like the new swipe gestures. They feel natural.
+
+Moderator: What about the search functionality?
+
+Participant 1: It's faster than before, but sometimes it doesn't find what I'm looking for.
+
+Participant 2: The voice search is great though! Very convenient when I'm driving.`
+                },
+                'support_call': {
+                    title: 'Support Call - Issue Resolution', 
+                    content: `Agent: Thank you for calling support. How can I help you today?
+
+Customer: I'm having trouble with the login process. It keeps saying my password is incorrect, but I'm sure it's right.
+
+Agent: I understand your frustration. Let me help you with that. Can you try resetting your password using the "Forgot Password" link?
+
+Customer: Oh, I didn't notice that option. Let me try that... Yes, that worked! Thank you so much.
+
+Agent: Great! Is there anything else I can help you with today?
+
+Customer: Actually, yes. How do I set up two-factor authentication?`
+                },
+                'team_standup': {
+                    title: 'Team Standup - Development Progress',
+                    content: `Scrum Master: Good morning everyone. Let's start with yesterday's progress.
+
+Developer 1: I completed the user authentication module and started working on the dashboard components.
+
+Developer 2: I finished the API integration for the payment system and resolved the database connection issues.
+
+Designer: I completed the mockups for the new onboarding flow and gathered feedback from the UX team.
+
+Scrum Master: Any blockers?
+
+Developer 1: I need clarification on the dashboard layout requirements.
+
+Developer 2: All good here, ready to move to testing phase.`
+                }
+            };
+
+            const sample = samples[type];
+            if (sample) {
+                document.getElementById('presentationTitle').value = sample.title;
+                document.getElementById('transcriptText').value = sample.content;
+            }
+        }
+
+        // Generate Presentation
+        async function generatePresentation() {
+            const title = document.getElementById('presentationTitle').value;
+            const transcriptText = document.getElementById('transcriptText').value;
+            const service = document.querySelector('input[name="transcriptionService"]:checked').value;
+            const fileInput = document.getElementById('fileInput');
+
+            // Validation
+            if (!transcriptText.trim() && !fileInput.files.length) {
+                alert('Please upload a file or enter text content.');
+                return;
+            }
+
+            // Show processing
+            showProcessing();
+            
+            try {
+                await simulateProcessing();
+                
+                // Generate mock results
+                const mockResults = {
+                    transcript: transcriptText || `File: ${fileInput.files[0]?.name}`,
+                    summary: "The user finds the new dashboard to be a significant improvement due to its cleaner layout and intuitive navigation. They appreciate the improved search functionality, effective filters, and enhanced data visualization. However, they noted challenges with slow loading times and limited customization options for layout, suggesting that resolving these issues could further enhance productivity.",
+                    themes: [
+                        "1. Improved layout and navigation",
+                        "2. Effective search and filters", 
+                        "3. Enhanced data visualization",
+                        "4. Performance issues: slow loading times",
+                        "5. Need for more layout customization"
+                    ],
+                    processingDetails: {
+                        'Service': 'Manual Input',
+                        'Speaker Diarization': '❌ Not available',
+                        'Language': 'Auto-detected'
+                    }
+                };
+                
+                showResults(mockResults);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while generating the presentation.');
+                resetToMain();
+            }
+        }
+
+        function showProcessing() {
+            document.getElementById('main-form').classList.add('hidden');
+            document.getElementById('processing-status').classList.remove('hidden');
+        }
+
+        async function simulateProcessing() {
+            const steps = [1, 2, 3, 4, 5];
+            
+            for (let i = 0; i < steps.length; i++) {
+                await new Promise(resolve => setTimeout(resolve, 800));
+                updateProcessingStep(steps[i]);
+            }
+        }
+
+        function updateProcessingStep(step) {
+            const stepEl = document.getElementById(`step-${step}`);
+            stepEl.className = 'w-8 h-8 rounded-full bg-black text-white mx-auto mb-2 flex items-center justify-center';
+            
+            // Update previous steps to green
+            for (let i = 1; i < step; i++) {
+                const prevStep = document.getElementById(`step-${i}`);
+                prevStep.className = 'w-8 h-8 rounded-full bg-green-500 text-white mx-auto mb-2 flex items-center justify-center';
+            }
+        }
+
+        function showResults(results) {
+            document.getElementById('processing-status').classList.add('hidden');
+            document.getElementById('results-section').classList.remove('hidden');
+            
+            // Populate results
+            document.getElementById('full-transcript').textContent = results.transcript;
+            const wordCount = results.transcript.split(' ').length;
+            document.getElementById('discussion-stats').textContent = `📊 ${wordCount} words • Manual Input • Auto-detected`;
+            
+            document.getElementById('executive-summary').textContent = results.summary;
+            
+            const themesDiv = document.getElementById('key-themes');
+            themesDiv.innerHTML = results.themes.map(theme => 
+                `<div class="flex items-center space-x-2">
+                    <span class="w-2 h-2 bg-black rounded-full"></span>
+                    <span class="text-gray-700">${theme}</span>
+                </div>`
+            ).join('');
+            
+            const detailsDiv = document.getElementById('processing-details');
+            detailsDiv.innerHTML = Object.entries(results.processingDetails).map(([key, value]) =>
+                `<div><span class="font-medium">${key}:</span> ${value}</div>`
+            ).join('');
+            
+            // Set download link
+            const downloadLink = document.getElementById('quick-download-link');
+            downloadLink.href = `/download/presentation_${Date.now()}.md`;
+            
+            currentResults = results;
+        }
+
+        function toggleDiscussion() {
+            const content = document.getElementById('full-transcript');
+            const button = document.getElementById('toggle-discussion');
+            
+            if (content.classList.contains('max-h-40')) {
+                content.classList.remove('max-h-40', 'overflow-y-auto');
+                button.textContent = 'Show Less';
+            } else {
+                content.classList.add('max-h-40', 'overflow-y-auto');
+                button.textContent = 'Show More';
+            }
+        }
+
+        // Export functions
+        async function downloadCustomFormat() {
+            const format = document.querySelector('input[name="exportFormat"]:checked').value;
+            const template = document.querySelector('input[name="exportTemplate"]:checked').value;
+            
+            if (!currentResults) {
+                alert('No presentation data available for export.');
+                return;
+            }
+            
+            // For now, just show success message since backend export isn't implemented
+            showExportSuccess();
+        }
+
+        async function downloadAllFormats() {
+            if (!currentResults) {
+                alert('No presentation data available for export.');
+                return;
+            }
+            
+            // For now, just show success message since backend export isn't implemented
+            showExportSuccess();
+        }
+
+        function showExportSuccess() {
+            const successMsg = document.createElement('div');
+            successMsg.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+            successMsg.textContent = 'Export completed successfully!';
+            document.body.appendChild(successMsg);
+            
+            setTimeout(() => {
+                if (document.body.contains(successMsg)) {
+                    document.body.removeChild(successMsg);
+                }
+            }, 3000);
+        }
+
+        function resetToMain() {
+            document.getElementById('processing-status').classList.add('hidden');
+            document.getElementById('results-section').classList.add('hidden');
+            document.getElementById('main-form').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+Focus Group - Mobile App Feature Discussion
+
+Moderator: Welcome everyone to today's focus group. We're here to discuss the new social sharing feature we're considering for our mobile app. Let's start with introductions. Sarah?
+
+Sarah: Hi, I'm Sarah. I've been using the app for about six months now. I love the current functionality, especially the photo editing tools.
+
+Mike: I'm Mike, been a user for over a year. I mainly use it for organizing my travel photos and creating albums.
+
+Lisa: Lisa here. I'm relatively new, maybe two months. I discovered the app through a friend's recommendation.
+
+Moderator: Great! Now let's talk about social sharing. Currently, you can save photos to your device or share them via other apps. How do you currently share photos from our app?
+
+Sarah: I usually save to my camera roll first, then share through Instagram or Facebook. It's a bit cumbersome, but it works.
+
+Mike: Same here. I wish I could share directly without having to save first. It takes extra steps and fills up my storage.
+
+Lisa: I actually didn't know I could save photos. I've been screenshotting them, which probably isn't the best quality.
+
+Moderator: Interesting! Lisa, that's valuable feedback about discoverability. Now, what if we added a direct sharing button right in the app?
+
+Sarah: That would be amazing! As long as it doesn't clutter the interface. I like how clean it is now.
+
+Mike: Definitely useful. Could we choose which social platforms to share to? I use different ones for different types of photos.
+
+Lisa: Yes, and maybe include a quick preview of how it'll look on each platform? Instagram crops differently than Facebook.
+
+Moderator: Those are excellent suggestions. Any concerns about adding social sharing features?
+
+Sarah: Privacy would be my main concern. I'd want to make sure I can control what information gets shared along with the photo.
+
+Mike: Agreed. And maybe an option to turn off the social features entirely for users who don't want them.
+
+Lisa: Also, making sure it doesn't slow down the app. Speed is one of the things I love about it.
+
+Moderator: Thank you all. These insights will be incredibly valuable for our development team.

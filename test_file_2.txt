@@ -1,0 +1,31 @@
+Moderator: Welcome everyone to today's product feedback session. We're here to discuss our new e-commerce checkout flow. Let's go around the table - please introduce yourselves.
+
+Sarah: I'm Sarah, a frequent online shopper. I probably make 3-4 purchases online each week.
+
+Mike: Hi, I'm Mike. I work in retail and also shop online regularly, mostly for electronics and gadgets.
+
+Lisa: I'm Lisa. I'm more of a cautious online shopper - I research a lot before buying anything.
+
+Moderator: Great! Now let's look at our new checkout process. Sarah, can you walk us through your experience with the first few steps?
+
+Sarah: The product selection was smooth, and I like how the cart shows estimated shipping immediately. The guest checkout option is great - I don't always want to create accounts everywhere.
+
+Mike: I agree with Sarah about the guest checkout. One thing I noticed though - the security badges are a bit small. As someone in retail, I know how important trust signals are during checkout.
+
+Lisa: Yes! Mike's point about security is so important to me. I need to feel confident about entering my payment information. Maybe those security symbols could be more prominent?
+
+Moderator: Excellent feedback on the trust elements. How did everyone feel about the payment options available?
+
+Sarah: I loved seeing Apple Pay and Google Pay options right upfront. It made the process so much faster.
+
+Mike: The variety is good, but the layout felt a bit cramped on mobile. The buttons were quite close together.
+
+Lisa: I actually prefer traditional card entry, so I'm glad that's still prominently featured. The autofill worked perfectly for me.
+
+Moderator: What about the final confirmation step? Any thoughts there?
+
+Sarah: The order summary was clear and comprehensive. I could easily see what I was buying and how much I was paying.
+
+Mike: The estimated delivery date was helpful, but I'd love to see more specific shipping options if possible.
+
+Lisa: I appreciated being able to review everything one more time. The "Edit" links made it easy to go back and change things if needed.

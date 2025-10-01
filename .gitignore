@@ -96,6 +96,10 @@ celerybeat.pid
 
 # Environments
 .env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 .venv
 env/
 venv/
@@ -126,3 +130,56 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Icon?
+Thumbs.db
+
+# Project specific
+# Generated presentations
+presentation*.md
+*_transcript.txt
+
+# Uploaded files and temp directories
+uploads/
+temp/
+tmp/
+
+# Whisper model cache
+~/.cache/whisper/
+
+# Audio files (typically large, should be stored elsewhere)
+*.mp3
+*.wav
+*.m4a
+*.mp4
+*.flac
+*.ogg
+
+# Logs
+*.log
+logs/
+
+# Database files
+*.db
+*.sqlite
+
+# Backup files
+*.bak
+*.backup
+
+# Node modules (if using any JS tools)
+node_modules/

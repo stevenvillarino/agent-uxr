@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - InsightDeck Agent</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#000000',
+                        secondary: '#6B7280'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #e5e7eb;
+            border-top: 2px solid #000000;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">⚙️ Settings</h1>
+            <p class="text-gray-600 max-w-2xl mx-auto">Configure your API keys and test connections</p>
+            <div class="flex justify-center items-center space-x-6 mt-4">
+                <a href="/" class="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                    🏠 Home
+                </a>
+                <a href="/settings" class="text-sm text-gray-900 font-medium">
+                    ⚙️ Settings
+                </a>
+            </div>
+        </div>
+
+        <!-- Settings Card -->
+        <div class="max-w-4xl mx-auto bg-white rounded-lg border shadow-sm p-6">
+            <!-- Alert -->
+            <div id="alert" class="hidden mb-6 p-4 rounded-md"></div>
+            
+            <!-- API Configuration Section -->
+            <div class="mb-8">
+                <div class="flex items-center space-x-3 mb-6 pb-4 border-b border-gray-200">
+                    <span class="text-2xl">🔑</span>
+                    <h2 class="text-xl font-semibold text-gray-900">API Configuration</h2>
+                </div>
+                
+                <!-- OpenAI Configuration -->
+                <div class="bg-gray-50 rounded-lg border border-gray-200 p-6 mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-1">🤖 OpenAI API Key</h3>
+                            <p class="text-sm text-gray-600">Required for AI analysis and insights generation</p>
+                        </div>
+                        <div id="openai-status" class="px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wide bg-red-100 text-red-800">
+                            Not Configured
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label for="openai-key" class="block text-sm font-medium text-gray-700 mb-2">API Key:</label>
+                            <input 
+                                type="password" 
+                                id="openai-key" 
+                                placeholder="sk-proj-..." 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent font-mono text-sm"
+                            />
+                            <div id="openai-preview" class="text-xs text-gray-500 font-mono mt-1"></div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-3">
+                            <button 
+                                onclick="testOpenAI()" 
+                                class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors"
+                            >
+                                🧪 Test Connection
+                            </button>
+                            <div id="openai-loading" class="hidden flex items-center space-x-2 text-sm text-gray-600">
+                                <div class="spinner"></div>
+                                <span>Testing connection...</span>
+                            </div>
+                        </div>
+                        
+                        <div id="openai-test-result" class="hidden p-3 rounded-md text-sm"></div>
+                    </div>
+                </div>
+
+                <!-- ElevenLabs Configuration -->
+                <div class="bg-gray-50 rounded-lg border border-gray-200 p-6 mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-1">🎯 ElevenLabs API Key</h3>
+                            <p class="text-sm text-gray-600">Optional - enables advanced transcription with speaker separation</p>
+                        </div>
+                        <div id="elevenlabs-status" class="px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wide bg-red-100 text-red-800">
+                            Not Configured
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label for="elevenlabs-key" class="block text-sm font-medium text-gray-700 mb-2">API Key:</label>
+                            <input 
+                                type="password" 
+                                id="elevenlabs-key" 
+                                placeholder="sk_..." 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent font-mono text-sm"
+                            />
+                            <div id="elevenlabs-preview" class="text-xs text-gray-500 font-mono mt-1"></div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-3">
+                            <button 
+                                onclick="testElevenLabs()" 
+                                class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors"
+                            >
+                                🧪 Test Connection
+                            </button>
+                            <div id="elevenlabs-loading" class="hidden flex items-center space-x-2 text-sm text-gray-600">
+                                <div class="spinner"></div>
+                                <span>Testing connection...</span>
+                            </div>
+                        </div>
+                        
+                        <div id="elevenlabs-test-result" class="hidden p-3 rounded-md text-sm"></div>
+                    </div>
+                </div>
+
+                <!-- Save Button -->
+                <button 
+                    onclick="saveConfiguration()" 
+                    class="w-full inline-flex items-center justify-center px-6 py-3 bg-black text-white font-medium rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 transition-colors"
+                >
+                    💾 Save Configuration
+                </button>
+            </div>
+            
+            <!-- Help Section -->
+            <div class="bg-blue-50 rounded-lg border border-blue-200 p-6 mt-8">
+                <h3 class="text-lg font-semibold text-blue-900 mb-4">📚 How to get your API keys:</h3>
+                <div class="space-y-4">
+                    <div>
+                        <p class="font-medium text-gray-900 mb-2">OpenAI:</p>
+                        <ul class="text-sm text-gray-700 space-y-1 ml-4">
+                            <li>• Visit <a href="https://platform.openai.com/api-keys" target="_blank" class="text-blue-600 hover:text-blue-800 underline">OpenAI API Keys</a></li>
+                            <li>• Create a new secret key</li>
+                            <li>• Copy and paste it above</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <p class="font-medium text-gray-900 mb-2">ElevenLabs (Optional):</p>
+                        <ul class="text-sm text-gray-700 space-y-1 ml-4">
+                            <li>• Visit <a href="https://elevenlabs.io/app/settings/api-keys" target="_blank" class="text-blue-600 hover:text-blue-800 underline">ElevenLabs API Keys</a></li>
+                            <li>• Generate a new API key</li>
+                            <li>• Make sure you have Speech-to-Text access</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentConfig = {};
+        
+        // Load current configuration on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCurrentConfig();
+        });
+        
+        async function loadCurrentConfig() {
+            try {
+                const response = await fetch('/api/config');
+                currentConfig = await response.json();
+                
+                // Update status badges
+                updateStatusBadge('openai', currentConfig.openai_configured);
+                updateStatusBadge('elevenlabs', currentConfig.elevenlabs_configured);
+                
+                // Show key previews
+                if (currentConfig.openai_key_preview) {
+                    document.getElementById('openai-preview').textContent = `Current: ${currentConfig.openai_key_preview}`;
+                }
+                if (currentConfig.elevenlabs_key_preview) {
+                    document.getElementById('elevenlabs-preview').textContent = `Current: ${currentConfig.elevenlabs_key_preview}`;
+                }
+            } catch (error) {
+                showAlert('Failed to load current configuration', 'error');
+            }
+        }
+        
+        function updateStatusBadge(service, configured) {
+            const badge = document.getElementById(`${service}-status`);
+            if (configured) {
+                badge.className = 'px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wide bg-green-100 text-green-800';
+                badge.textContent = 'Configured';
+            } else {
+                badge.className = 'px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wide bg-red-100 text-red-800';
+                badge.textContent = 'Not Configured';
+            }
+        }
+        
+        async function testOpenAI() {
+            const apiKey = document.getElementById('openai-key').value.trim();
+            const loadingDiv = document.getElementById('openai-loading');
+            const resultDiv = document.getElementById('openai-test-result');
+            
+            loadingDiv.classList.remove('hidden');
+            loadingDiv.classList.add('flex');
+            resultDiv.classList.add('hidden');
+            
+            try {
+                const response = await fetch('/api/test-openai', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ api_key: apiKey })
+                });
+                
+                const result = await response.json();
+                loadingDiv.classList.add('hidden');
+                loadingDiv.classList.remove('flex');
+                
+                if (result.success) {
+                    resultDiv.className = 'block p-3 rounded-md text-sm bg-green-100 text-green-800 border border-green-200';
+                    resultDiv.innerHTML = `✅ ${result.message}<br><small>Model: ${result.model} • Response: "${result.response}"</small>`;
+                } else {
+                    resultDiv.className = 'block p-3 rounded-md text-sm bg-red-100 text-red-800 border border-red-200';
+                    resultDiv.innerHTML = `❌ ${result.error}`;
+                }
+                
+                resultDiv.classList.remove('hidden');
+            } catch (error) {
+                loadingDiv.classList.add('hidden');
+                loadingDiv.classList.remove('flex');
+                resultDiv.className = 'block p-3 rounded-md text-sm bg-red-100 text-red-800 border border-red-200';
+                resultDiv.innerHTML = `❌ Connection test failed: ${error.message}`;
+                resultDiv.classList.remove('hidden');
+            }
+        }
+        
+        async function testElevenLabs() {
+            const apiKey = document.getElementById('elevenlabs-key').value.trim();
+            const loadingDiv = document.getElementById('elevenlabs-loading');
+            const resultDiv = document.getElementById('elevenlabs-test-result');
+            
+            loadingDiv.classList.remove('hidden');
+            loadingDiv.classList.add('flex');
+            resultDiv.classList.add('hidden');
+            
+            try {
+                const response = await fetch('/api/test-elevenlabs', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ api_key: apiKey })
+                });
+                
+                const result = await response.json();
+                loadingDiv.classList.add('hidden');
+                loadingDiv.classList.remove('flex');
+                
+                if (result.success) {
+                    resultDiv.className = 'block p-3 rounded-md text-sm bg-green-100 text-green-800 border border-green-200';
+                    resultDiv.innerHTML = `✅ ${result.message}<br><small>Plan: ${result.subscription} • Characters used: ${result.character_count}/${result.character_limit}</small>`;
+                } else {
+                    resultDiv.className = 'block p-3 rounded-md text-sm bg-red-100 text-red-800 border border-red-200';
+                    resultDiv.innerHTML = `❌ ${result.error}`;
+                }
+                
+                resultDiv.classList.remove('hidden');
+            } catch (error) {
+                loadingDiv.classList.add('hidden');
+                loadingDiv.classList.remove('flex');
+                resultDiv.className = 'block p-3 rounded-md text-sm bg-red-100 text-red-800 border border-red-200';
+                resultDiv.innerHTML = `❌ Connection test failed: ${error.message}`;
+                resultDiv.classList.remove('hidden');
+            }
+        }
+        
+        async function saveConfiguration() {
+            const openaiKey = document.getElementById('openai-key').value.trim();
+            const elevenlabsKey = document.getElementById('elevenlabs-key').value.trim();
+            
+            if (!openaiKey && !elevenlabsKey) {
+                showAlert('Please enter at least one API key', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        openai_key: openaiKey,
+                        elevenlabs_key: elevenlabsKey
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('✅ Configuration saved successfully! Your API keys are now ready to use.', 'success');
+                    loadCurrentConfig(); // Refresh the display
+                    
+                    // Clear input fields
+                    document.getElementById('openai-key').value = '';
+                    document.getElementById('elevenlabs-key').value = '';
+                } else {
+                    showAlert(`❌ ${result.error}`, 'error');
+                }
+            } catch (error) {
+                showAlert(`❌ Failed to save configuration: ${error.message}`, 'error');
+            }
+        }
+        
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            if (type === 'success') {
+                alert.className = 'block p-4 rounded-md bg-green-100 text-green-800 border border-green-200';
+            } else {
+                alert.className = 'block p-4 rounded-md bg-red-100 text-red-800 border border-red-200';
+            }
+            alert.innerHTML = message;
+            alert.classList.remove('hidden');
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                alert.classList.add('hidden');
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
