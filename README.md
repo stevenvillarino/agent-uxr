@@ -5,6 +5,7 @@
 
 [![Python 3.8+](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
 [![OpenAI](https://img.shields.io/badge/AI-OpenAI%20GPT--4o-green.svg)](https://openai.com)
+[![ElevenLabs](https://img.shields.io/badge/Audio-ElevenLabs%20STT-purple.svg)](https://elevenlabs.io)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/Status-Active%20Development-orange.svg)]()
 
@@ -13,6 +14,11 @@
 ## 🎯 **For UXR Teams: What This Solves**
 
 User Experience Researchers spend **60-80% of their time** on manual data synthesis and presentation creation instead of generating insights. InsightDeck Agent automates this workflow, transforming research transcripts into professional presentation decks in minutes.
+
+### 🎧 **Advanced Audio Processing**
+- **Dual Transcription Engines:** Choose between OpenAI Whisper or ElevenLabs Speech-to-Text
+- **Speaker Diarization:** Automatic "who said what" identification with ElevenLabs
+- **Real-time Processing:** Live audio session support with WebSocket integration
 
 ### 📊 **Research Process Transformation**
 
@@ -40,12 +46,16 @@ flowchart LR
 ## 🚀 **Current Capabilities (POC)**
 
 ### ✅ **Available Now**
+
 - **📄 Text Processing:** Upload research transcripts (.txt files)
+- **🎵 Audio Transcription:** Dual engine support - OpenAI Whisper + ElevenLabs Speech-to-Text
+- **👥 Speaker Diarization:** Automatic speaker identification and separation (ElevenLabs)
 - **🤖 AI Analysis:** GPT-4o extracts key themes and insights
 - **📊 Auto-Presentation:** Generates Marp presentation slides
 - **⚡ Fast Processing:** Results in under 5 minutes
-- **🌐 Web Interface:** User-friendly browser-based tool
-- **🎤 Audio Support:** Whisper transcription for audio files
+- **🌐 Web Interface:** User-friendly browser-based tool with service selection
+- **⚙️ API Configuration:** Built-in settings panel for OpenAI and ElevenLabs keys
+- **🎧 Live Sessions:** Real-time audio processing with WebSocket support
 
 ### 🔄 **Processing Workflow**
 
@@ -101,7 +111,9 @@ architecture-beta
 | **Frontend** | HTML5, CSS3, JavaScript | User interface |
 | **Backend** | Python 3.8+, Flask | API & processing |
 | **AI Analysis** | OpenAI GPT-4o | Insight extraction |
-| **Transcription** | OpenAI Whisper | Audio-to-text |
+| **Transcription** | OpenAI Whisper + ElevenLabs STT | Audio-to-text conversion |
+| **Speaker ID** | ElevenLabs API | Speaker diarization |
+| **Real-time** | WebSockets, Flask-SocketIO | Live audio sessions |
 | **Presentations** | Marp Markdown | Slide generation |
 | **Storage** | Local file system | Document handling |
 
@@ -153,8 +165,9 @@ cd agent-uxr
 # 2. Install dependencies
 pip install -r requirements.txt
 
-# 3. Set up API key
-export OPENAI_API_KEY='your-api-key-here'
+# 3. Set up API keys
+export OPENAI_API_KEY='your-openai-api-key-here'
+export ELEVENLABS_API_KEY='your-elevenlabs-api-key-here'  # Optional for speaker diarization
 
 # 4. Launch web app
 python web_app.py
@@ -162,6 +175,11 @@ python web_app.py
 # 5. Open browser
 open http://localhost:8080
 ```
+
+**🔧 API Key Setup:**
+- **OpenAI:** Required for AI analysis ([Get API Key](https://platform.openai.com/api-keys))
+- **ElevenLabs:** Optional for speaker diarization ([Get API Key](https://elevenlabs.io/))
+- **Web Settings:** Configure keys through the web interface settings panel
 
 ### **Option 2: Command Line**
 ```bash
@@ -253,7 +271,7 @@ flowchart TB
 ```
 
 ### **Enterprise Features Pipeline**
-- 🎤 **Speaker Diarization:** "Who said what" in group sessions
+- ✅ **Speaker Diarization:** "Who said what" in group sessions (Available with ElevenLabs)
 - 📊 **Auto-Visualization:** Charts and graphs from quantitative data
 - 🏢 **Brand Integration:** Corporate templates and styling
 - 🤝 **Collaboration Tools:** Multi-user editing and review

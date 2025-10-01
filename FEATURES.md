@@ -104,32 +104,40 @@ theme: default
 
 ### F-10: Audio File Transcription
 **Priority:** P0 (Critical)  
-**Status:** 🔄 Planned  
+**Status:** ✅ Implemented (Dual Engine Support)
 
-**Description:** Accept audio files and convert to text using OpenAI Whisper before analysis.
+**Description:** Accept audio files and convert to text using OpenAI Whisper or ElevenLabs Speech-to-Text.
 
 **Specifications:**
 - **Input Formats:** MP3, WAV, M4A, MP4
 - **File Size Limit:** 100MB maximum
-- **Transcription Service:** OpenAI Whisper API
+- **Transcription Services:** 
+  - OpenAI Whisper API (standard transcription)
+  - ElevenLabs Speech-to-Text (with speaker diarization)
 - **Language Support:** Auto-detect, 50+ languages
 - **Processing Time:** <10 minutes per hour of audio
 
-**Implementation Plan:**
+**Current Implementation:**
 ```python
-import whisper
-
-def transcribe_audio(file_path):
-    model = whisper.load_model("base")
-    result = model.transcribe(file_path)
-    return result["text"]
+# Dual transcription support in web_app.py
+def transcribe_with_elevenlabs(audio_file_path, enable_diarization=True):
+    # ElevenLabs API with speaker separation
+    
+def transcribe_audio_whisper(audio_file_path):
+    # OpenAI Whisper transcription
 ```
 
+**Service Selection:**
+- Users can choose between Whisper and ElevenLabs via web interface
+- ElevenLabs provides speaker diarization ("who said what")
+- Whisper provides fast, accurate basic transcription
+
 **Acceptance Criteria:**
-- [ ] Support major audio formats
-- [ ] Accurate transcription (>90% accuracy)
-- [ ] Handle multiple languages
-- [ ] Error handling for corrupted files
+- [x] Support major audio formats
+- [x] Dual transcription engine support
+- [x] Speaker diarization with ElevenLabs
+- [x] Service selection in web interface
+- [x] Error handling for both services
 
 ---
 
@@ -153,17 +161,41 @@ def transcribe_audio(file_path):
 
 ---
 
-### F-12: Basic Web Interface
+### F-12: Web Interface
 **Priority:** P1 (High)  
-**Status:** 🔄 Planned  
+**Status:** ✅ Implemented  
 
-**Description:** Simple web-based interface for file upload and presentation generation.
+**Description:** Full-featured web-based interface for file upload, service selection, and presentation generation.
 
-**Specifications:**
-- **Technology:** Flask/FastAPI + HTML/CSS/JS
-- **Features:** Drag-and-drop upload, progress tracking, download results
-- **Authentication:** Basic user accounts (optional)
-- **Responsive:** Mobile-friendly design
+**Current Implementation:**
+- **Technology:** Flask + HTML/CSS/JavaScript
+- **Features:** 
+  - Drag-and-drop file upload (text and audio files)
+  - Service selection (Whisper vs ElevenLabs)
+  - Speaker diarization toggle
+  - Real-time processing status
+  - Download results functionality
+  - API key configuration panel
+  - Live session support with WebSocket
+- **Responsive Design:** Mobile-friendly interface
+- **Built-in Settings:** OpenAI and ElevenLabs API key management
+
+**Available Features:**
+- File upload interface with format validation
+- Dual transcription engine selection
+- Progress tracking during processing
+- Downloadable presentation and transcript results
+- Settings panel for API configuration
+- Demo mode for testing without API keys
+- Live audio session interface
+
+**File Structure:**
+```
+templates/
+├── index.html          # Main upload interface
+├── settings.html       # API configuration
+├── live_session.html   # Real-time audio processing
+```
 
 ## 4. Enterprise Features (v1.0) - FUTURE VISION
 
@@ -209,13 +241,36 @@ def transcribe_audio(file_path):
 
 ### F-22: Speaker Diarization & Attribution
 **Priority:** P1 (High)  
-**Status:** 📋 Backlog  
+**Status:** ✅ Partially Implemented (ElevenLabs) / 📋 Enhanced Features Backlog
 
 **Description:** Identify and separate different speakers in research sessions, attributing quotes and insights to specific participants.
 
-**Important Note:** OpenAI Whisper does NOT support speaker diarization. For "who said what" functionality, we need additional services.
+**Current Implementation:**
+- ✅ **ElevenLabs Integration:** Speaker diarization available through ElevenLabs Speech-to-Text API
+- ✅ **Service Selection:** Users can choose ElevenLabs for speaker separation in web interface
+- ✅ **API Integration:** Built-in support for ElevenLabs eleven_turbo_v2_5 model with diarization
 
-**Diarization Options:**
+**Current Capabilities:**
+```python
+# Already implemented in web_app.py
+def transcribe_with_elevenlabs(audio_file_path, enable_diarization=True):
+    # Uses ElevenLabs API with speaker diarization
+    # Returns transcript with speaker labels
+```
+
+**Available Now:**
+- **ElevenLabs STT:** Commercial API with built-in speaker diarization
+- **Speaker Labels:** Automatic speaker detection and labeling
+- **Web Interface:** Toggle diarization on/off in settings
+- **API Configuration:** Built-in ElevenLabs API key management
+
+**Future Enhancements (Backlog):**
+- **Multi-Service Support:** AWS Transcribe, Azure Speech Services integration
+- **Advanced Attribution:** Link insights back to specific speakers
+- **Privacy Controls:** Speaker anonymization options
+- **Enhanced Analysis:** Speaker-specific sentiment and theme analysis
+
+**Additional Service Options (Future):**
 - **AWS Transcribe:** Built-in speaker diarization, identifies speakers as "Speaker 1", "Speaker 2", etc.
 - **Azure Speech Services:** Similar speaker separation capabilities
 - **pyannote-audio:** Open-source diarization library (requires additional setup)
@@ -378,17 +433,23 @@ Azure Configuration:
 
 ## 6. Feature Roadmap Timeline
 
-### Phase 1: POC (Q4 2025) ✅ Current
+### Phase 1: POC (Q4 2025) ✅ Complete
 - [x] Text file input processing
 - [x] OpenAI GPT-4o insight extraction
 - [x] Marp presentation generation
 - [x] Basic error handling and CLI interface
+- [x] Web-based interface with file upload
+- [x] Audio transcription (Whisper + ElevenLabs)
+- [x] Speaker diarization (ElevenLabs)
+- [x] Service selection and API key management
+- [x] Live session support with WebSocket
 
 ### Phase 2: MVP (Q1 2026)
-- [ ] Audio transcription (Whisper integration)
+- [x] Audio transcription (Whisper integration) ✅ Already Complete
 - [ ] Enhanced presentation templates
-- [ ] Basic web interface
+- [x] Web interface ✅ Already Complete
 - [ ] Improved error handling and logging
+- [ ] User authentication and session management
 
 ### Phase 3: Enterprise Core (Q2 2026)
 - [ ] Multi-agent orchestration system
