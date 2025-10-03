@@ -1,0 +1,24 @@
+# Requirements for Cerebras Example
+# Based on: https://inference-docs.cerebras.ai/cookbook/agents/automate-user-research
+
+# Core LangGraph and LangChain
+langgraph>=0.2.0
+langchain>=0.3.0
+langchain-core>=0.3.0
+
+# Original Cerebras SDK (optional - will fallback to OpenAI/Anthropic)
+cerebras-cloud-sdk>=1.0.0
+
+# Alternative LLM providers (at least one required)
+langchain-openai>=0.2.0
+langchain-anthropic>=0.2.0
+langchain-cerebras>=0.1.0  # If you want to test with Cerebras
+
+# Data validation
+pydantic>=2.0.0
+
+# Environment management
+python-dotenv>=1.0.0
+
+# Async support
+aiohttp>=3.9.0

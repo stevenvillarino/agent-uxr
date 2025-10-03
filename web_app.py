@@ -4,7 +4,12 @@ import os
 import tempfile
 import uuid
 import json
-import whisper
+try:
+    import whisper
+    WHISPER_AVAILABLE = True
+except ImportError:
+    WHISPER_AVAILABLE = False
+    print("⚠️  Whisper not available - only ElevenLabs transcription will work")
 import requests
 import re
 from datetime import datetime
@@ -175,6 +180,9 @@ def transcribe_with_whisper(audio_file_path):
     """
     Transcribe audio using OpenAI Whisper (local model).
     """
+    if not WHISPER_AVAILABLE:
+        raise Exception("Whisper is not installed. Please use ElevenLabs transcription instead.")
+    
     try:
         # Load Whisper model (using 'base' model for balance of speed and accuracy)
         print("Loading Whisper model...")
@@ -365,6 +373,9 @@ def process_transcript():
                     
                     else:
                         # Default to Whisper
+                        if not WHISPER_AVAILABLE:
+                            return jsonify({'success': False, 'error': 'Whisper is not installed. Please select ElevenLabs for transcription.'}), 400
+                        
                         print("Transcribing with OpenAI Whisper (no speaker separation)...")
                         model = whisper.load_model("base")
                         result = model.transcribe(audio_file_path)
