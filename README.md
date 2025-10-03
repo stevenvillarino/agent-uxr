@@ -7,7 +7,9 @@
 [![OpenAI](https://img.shields.io/badge/AI-OpenAI%20GPT--4o-green.svg)](https://openai.com)
 [![ElevenLabs](https://img.shields.io/badge/Audio-ElevenLabs%20STT-purple.svg)](https://elevenlabs.io)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Status](https://img.shields.io/badge/Status-Active%20Development-orange.svg)]()
+[![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen.svg)]()
+
+**🎉 Latest Update (October 2, 2025):** Production ready with complete deployment automation! Web interface live, APIs validated, and deployment takes just 5 minutes with Cloudflare Tunnel.
 
 ---
 
@@ -340,6 +342,43 @@ Check the `outputs/` directory for example presentations generated from real res
 - 📈 **Bias reduction** in analysis
 - 🎨 **Professional presentation quality**
 - ✅ **Stakeholder satisfaction increase**
+
+---
+
+## 🌐 **Deployment**
+
+### **Quick Deploy with Cloudflare Tunnel** ⚡
+
+Deploy securely in 5 minutes with zero exposed ports:
+
+```bash
+# 1. Run the setup script
+./setup-tunnel.sh
+
+# 2. Start the services
+# Terminal 1: Flask app
+source venv/bin/activate && python web_app.py
+
+# Terminal 2: Cloudflare tunnel
+cloudflared tunnel run insightdeck-agent
+```
+
+**Your app is now live with:**
+- ✅ HTTPS encryption
+- ✅ Global CDN performance
+- ✅ No firewall configuration needed
+- ✅ Optional Zero Trust authentication
+
+### **Deployment Options**
+
+| Method | Setup Time | Best For | Cost |
+|--------|------------|----------|------|
+| **Cloudflare Tunnel** | 5 min | Quick demos, secure access | Free |
+| **Docker** | 10 min | Containerized deployment | Free |
+| **Railway/Render** | 15 min | Cloud hosting | $5-20/mo |
+| **Cloudflare Workers** | 2 hours | Serverless production | Free tier |
+
+📖 **Full deployment guide:** See [DEPLOYMENT.md](docs/deployment/DEPLOYMENT.md)
 
 ---
 

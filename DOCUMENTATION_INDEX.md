@@ -1,6 +1,10 @@
 # 📋 InsightDeck Agent: Complete Documentation Index
 ## Your Comprehensive Guide to AI-Powered Research Automation
 
+**Last Updated:** October 2, 2025  
+**Status:** ✅ Production Ready  
+**Documentation Structure:** Organized by category
+
 ---
 
 ## 🎯 **What is InsightDeck Agent?**
@@ -8,6 +12,7 @@
 InsightDeck Agent is an AI-powered system that **transforms user research transcripts into professional presentation decks in minutes**, reducing manual synthesis time by 85% while maintaining high-quality insights.
 
 ### **For UXR Teams: The Bottom Line**
+
 - ⚡ **15 minutes** instead of 4-6 hours per interview analysis
 - 🎯 **Consistent** insight quality across all research sessions  
 - 📊 **Professional** presentations ready for stakeholders
@@ -15,31 +20,73 @@ InsightDeck Agent is an AI-powered system that **transforms user research transc
 
 ---
 
-## 📚 **Documentation Library**
+## � **Documentation Structure**
+
+All documentation is organized in the `docs/` directory:
+
+```
+agent-uxr/
+├── README.md                        # Start here!
+├── DOCUMENTATION_INDEX.md           # This file
+├── setup-tunnel.sh                  # Quick deployment script
+│
+├── docs/
+│   ├── deployment/                  # Deployment guides
+│   ├── development/                 # Dev logs & status reports
+│   ├── product/                     # Product & strategy docs
+│   └── guides/                      # Technical guides & examples
+```
+
+---
+
+## �📚 **Documentation Library**
 
 ### **🚀 Getting Started**
 
-| Document | Purpose | Best For |
-|----------|---------|----------|
-| **[README.md](./README.md)** | Main overview and quick start | First-time users, setup |
-| **[UX_PRESENTATION.md](./UX_PRESENTATION.md)** | UXR team presentation deck | Stakeholder presentations |
-| **[USAGE_EXAMPLES.md](./USAGE_EXAMPLES.md)** | Real-world case studies | Implementation planning |
+| Document | Location | Purpose | Best For |
+|----------|----------|---------|----------|
+| **[README.md](./README.md)** | Root | Main overview and quick start | First-time users, setup |
+| **[setup-tunnel.sh](./setup-tunnel.sh)** | Root | Automated deployment script | Quick deployment |
 
-### **🏗️ Technical Documentation**
+### **🌐 Deployment & Operations**
 
-| Document | Purpose | Best For |
-|----------|---------|----------|
-| **[TECHNICAL_FRAMEWORK.md](./TECHNICAL_FRAMEWORK.md)** | Architecture & tech stack | Technical teams, IT |
-| **[ARCHITECTURE.md](./ARCHITECTURE.md)** | System design details | Engineering teams |
-| **[FEATURES.md](./FEATURES.md)** | Feature specifications | Product managers |
+| Document | Location | Purpose | Best For |
+|----------|----------|---------|----------|
+| **[DEPLOYMENT.md](./docs/deployment/DEPLOYMENT.md)** | docs/deployment/ | Complete deployment guide | DevOps, IT teams |
+| **[QUICKSTART_DEPLOY.md](./docs/deployment/QUICKSTART_DEPLOY.md)** | docs/deployment/ | Quick deployment reference | Fast setup |
+| **[DEPLOYMENT_COMPLETE.md](./docs/deployment/DEPLOYMENT_COMPLETE.md)** | docs/deployment/ | Deployment summary & demo prep | Presentations |
 
-### **📊 Strategic Planning**
+### **👨‍💻 Development & Status**
 
-| Document | Purpose | Best For |
-|----------|---------|----------|
-| **[PRODUCT_ROADMAP.md](./PRODUCT_ROADMAP.md)** | Development timeline | Leadership, planning |
-| **[PRD.md](./PRD.md)** | Product requirements | Product teams |
-| **[TRANSCRIPTION_COMPARISON.md](./TRANSCRIPTION_COMPARISON.md)** | Service comparisons | Technical decisions |
+| Document | Location | Purpose | Best For |
+|----------|----------|---------|----------|
+| **[DEVLOG_20251002.md](./docs/development/DEVLOG_20251002.md)** | docs/development/ | Development log (Oct 2, 2025) | Technical history |
+| **[STATUS_REPORT_20251002.md](./docs/development/STATUS_REPORT_20251002.md)** | docs/development/ | Executive status report | Stakeholders |
+| **[DOCS_UPDATE_SUMMARY.md](./docs/development/DOCS_UPDATE_SUMMARY.md)** | docs/development/ | Documentation update log | Reference |
+
+### **📊 Product & Strategy**
+
+| Document | Location | Purpose | Best For |
+|----------|----------|---------|----------|
+| **[PRD.md](./docs/product/PRD.md)** | docs/product/ | Product requirements | Product teams |
+| **[PRODUCT_ROADMAP.md](./docs/product/PRODUCT_ROADMAP.md)** | docs/product/ | Development timeline | Leadership, planning |
+| **[FEATURES.md](./docs/product/FEATURES.md)** | docs/product/ | Feature specifications | Product managers |
+
+### **🏗️ Technical Guides**
+
+| Document | Location | Purpose | Best For |
+|----------|----------|---------|----------|
+| **[TECHNICAL_FRAMEWORK.md](./docs/guides/TECHNICAL_FRAMEWORK.md)** | docs/guides/ | Architecture & tech stack | Technical teams, IT |
+| **[ARCHITECTURE.md](./docs/guides/ARCHITECTURE.md)** | docs/guides/ | System design details | Engineering teams |
+| **[TRANSCRIPTION_COMPARISON.md](./docs/guides/TRANSCRIPTION_COMPARISON.md)** | docs/guides/ | Service comparisons | Technical decisions |
+
+### **📖 Usage & Presentations**
+
+| Document | Location | Purpose | Best For |
+|----------|----------|---------|----------|
+| **[USAGE_EXAMPLES.md](./docs/guides/USAGE_EXAMPLES.md)** | docs/guides/ | Real-world case studies | Implementation planning |
+| **[UX_PRESENTATION.md](./docs/guides/UX_PRESENTATION.md)** | docs/guides/ | UXR team presentation deck | Stakeholder presentations |
+| **[UX.md](./docs/guides/UX.md)** | docs/guides/ | UX design specifications | Design teams |
 
 ---
 
