@@ -183,3 +183,6 @@ logs/
 
 # Node modules (if using any JS tools)
 node_modules/
+
+# Specstory
+.specstory/
