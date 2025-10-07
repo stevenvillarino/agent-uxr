@@ -743,6 +743,7 @@ Developer 2: All good here, ready to move to testing phase.`
             const title = document.getElementById('presentationTitle').value;
             const transcriptText = document.getElementById('transcriptText').value;
             const service = document.querySelector('input[name="transcriptionService"]:checked')?.value || 'whisper';
+            const enableDiarization = document.querySelector('input[name="enableDiarization"]')?.checked || false;
             const fileInput = document.getElementById('fileInput');
 
             // Validation
@@ -755,30 +756,53 @@ Developer 2: All good here, ready to move to testing phase.`
             showProcessing();
             
             try {
-                await simulateProcessing();
+                // Create form data
+                const formData = new FormData();
+                formData.append('title', title);
+                formData.append('service_type', service);
+                formData.append('enable_diarization', enableDiarization);
                 
-                // Generate mock results
-                const mockResults = {
-                    transcript: transcriptText || `File: ${fileInput.files[0]?.name}`,
-                    summary: "The user finds the new dashboard to be a significant improvement due to its cleaner layout and intuitive navigation. They appreciate the improved search functionality, effective filters, and enhanced data visualization. However, they noted challenges with slow loading times and limited customization options for layout, suggesting that resolving these issues could further enhance productivity.",
-                    themes: [
-                        "1. Improved layout and navigation",
-                        "2. Effective search and filters", 
-                        "3. Enhanced data visualization",
-                        "4. Performance issues: slow loading times",
-                        "5. Need for more layout customization"
-                    ],
+                // Add file or text content
+                if (fileInput.files.length > 0) {
+                    formData.append('file', fileInput.files[0]);
+                } else {
+                    formData.append('text_content', transcriptText);
+                }
+                
+                // Make API call to backend
+                const response = await fetch('/process', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to process content');
+                }
+                
+                const data = await response.json();
+                
+                if (!data.success) {
+                    throw new Error(data.error || 'Processing failed');
+                }
+                
+                // Format results for display
+                const results = {
+                    transcript: data.full_transcription || data.transcription || '',
+                    summary: data.insights?.summary || 'No summary available',
+                    themes: data.insights?.themes || [],
                     processingDetails: {
-                        'Service': 'Manual Input',
-                        'Speaker Diarization': '❌ Not available',
-                        'Language': 'Auto-detected'
-                    }
+                        'Service': data.transcription_info?.service || 'Unknown',
+                        'Speaker Diarization': data.transcription_info?.has_speakers ? '✅ Enabled' : '❌ Not available',
+                        'Language': data.transcription_info?.language || 'Auto-detected'
+                    },
+                    download_url: data.download_url
                 };
                 
-                showResults(mockResults);
+                showResults(results);
             } catch (error) {
                 console.error('Error:', error);
-                alert('An error occurred while generating the presentation.');
+                alert(`An error occurred: ${error.message}`);
                 resetToMain();
             }
         }
@@ -819,12 +843,14 @@ Developer 2: All good here, ready to move to testing phase.`
             // Populate results
             document.getElementById('full-transcript').textContent = results.transcript;
             const wordCount = results.transcript.split(' ').length;
-            document.getElementById('discussion-stats').textContent = `📊 ${wordCount} words • Manual Input • Auto-detected`;
+            const serviceInfo = results.processingDetails?.Service || 'Manual Input';
+            const languageInfo = results.processingDetails?.Language || 'Auto-detected';
+            document.getElementById('discussion-stats').textContent = `📊 ${wordCount} words • ${serviceInfo} • ${languageInfo}`;
             
             document.getElementById('executive-summary').textContent = results.summary;
             
             const themesDiv = document.getElementById('key-themes');
-            themesDiv.innerHTML = results.themes.map(theme => 
+            themesDiv.innerHTML = results.themes.map((theme, index) => 
                 `<div class="flex items-center space-x-2">
                     <span class="w-2 h-2 bg-black rounded-full"></span>
                     <span class="text-gray-700">${theme}</span>
@@ -838,7 +864,15 @@ Developer 2: All good here, ready to move to testing phase.`
             
             // Set download link
             const downloadLink = document.getElementById('quick-download-link');
-            downloadLink.href = `/download/presentation_${Date.now()}.md`;
+            if (results.download_url) {
+                downloadLink.href = results.download_url;
+            } else {
+                downloadLink.href = '#';
+                downloadLink.onclick = (e) => {
+                    e.preventDefault();
+                    alert('No download available');
+                };
+            }
             
             currentResults = results;
         }
@@ -866,8 +900,42 @@ Developer 2: All good here, ready to move to testing phase.`
                 return;
             }
             
-            // For now, just show success message since backend export isn't implemented
-            showExportSuccess();
+            try {
+                const response = await fetch('/export', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        format: format,
+                        template: template,
+                        insights: {
+                            summary: currentResults.summary,
+                            themes: currentResults.themes
+                        },
+                        transcript: currentResults.transcript,
+                        transcription_info: currentResults.processingDetails,
+                        title: document.getElementById('presentationTitle').value
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Export failed');
+                }
+                
+                const data = await response.json();
+                
+                if (data.success && data.download_url) {
+                    // Download the file
+                    window.location.href = data.download_url;
+                    showExportSuccess();
+                } else {
+                    throw new Error(data.error || 'Export failed');
+                }
+            } catch (error) {
+                console.error('Export error:', error);
+                alert(`Export failed: ${error.message}`);
+            }
         }
 
         async function downloadAllFormats() {
@@ -876,8 +944,46 @@ Developer 2: All good here, ready to move to testing phase.`
                 return;
             }
             
-            // For now, just show success message since backend export isn't implemented
-            showExportSuccess();
+            const formats = ['markdown', 'html', 'json'];
+            const template = document.querySelector('input[name="exportTemplate"]:checked').value;
+            
+            try {
+                for (const format of formats) {
+                    const response = await fetch('/export', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            format: format,
+                            template: template,
+                            insights: {
+                                summary: currentResults.summary,
+                                themes: currentResults.themes
+                            },
+                            transcript: currentResults.transcript,
+                            transcription_info: currentResults.processingDetails,
+                            title: document.getElementById('presentationTitle').value
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.download_url) {
+                            // Open download in new window to allow multiple downloads
+                            window.open(data.download_url, '_blank');
+                        }
+                    }
+                    
+                    // Small delay between downloads
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                }
+                
+                showExportSuccess();
+            } catch (error) {
+                console.error('Export error:', error);
+                alert(`Export failed: ${error.message}`);
+            }
         }
 
         function showExportSuccess() {

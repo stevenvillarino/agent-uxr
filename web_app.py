@@ -4,12 +4,6 @@ import os
 import tempfile
 import uuid
 import json
-try:
-    import whisper
-    WHISPER_AVAILABLE = True
-except ImportError:
-    WHISPER_AVAILABLE = False
-    print("⚠️  Whisper not available - only ElevenLabs transcription will work")
 import requests
 import re
 from datetime import datetime
@@ -17,8 +11,14 @@ from openai import OpenAI
 from main import get_insights_from_llm, format_marp_presentation
 from dotenv import load_dotenv
 
+# Note: We use OpenAI Whisper API (cloud-based) instead of local whisper package
+# This eliminates the need for local PyTorch installation and works with Python 3.13+
+
 # Load environment variables
 load_dotenv()
+
+# Initialize OpenAI client for Whisper API and analysis
+client = OpenAI()
 
 app = Flask(__name__)
 UPLOAD_FOLDER = tempfile.gettempdir()
@@ -178,30 +178,37 @@ def transcribe_with_elevenlabs(audio_file_path, enable_diarization=True):
 
 def transcribe_with_whisper(audio_file_path):
     """
-    Transcribe audio using OpenAI Whisper (local model).
+    Transcribe audio using OpenAI Whisper API (cloud-based).
+    This uses the OpenAI API instead of a local model, which is:
+    - Faster and more reliable
+    - No local installation required
+    - Works with Python 3.13+
+    - Affordable ($0.006/minute)
     """
-    if not WHISPER_AVAILABLE:
-        raise Exception("Whisper is not installed. Please use ElevenLabs transcription instead.")
-    
     try:
-        # Load Whisper model (using 'base' model for balance of speed and accuracy)
-        print("Loading Whisper model...")
-        model = whisper.load_model("base")
+        print(f"Transcribing audio file with OpenAI Whisper API: {audio_file_path}")
         
-        # Transcribe the audio
-        print(f"Transcribing audio file with Whisper: {audio_file_path}")
-        result = model.transcribe(audio_file_path)
+        with open(audio_file_path, "rb") as audio_file:
+            transcript = client.audio.transcriptions.create(
+                model="whisper-1",
+                file=audio_file,
+                response_format="verbose_json"  # Get language info
+            )
+        
+        # Extract text and language from response
+        text = transcript.text if hasattr(transcript, 'text') else str(transcript)
+        language = transcript.language if hasattr(transcript, 'language') else 'unknown'
         
         return {
-            'text': result['text'].strip(),
+            'text': text.strip(),
             'has_speakers': False,  # Whisper doesn't provide speaker diarization
             'speaker_count': 0,
-            'service': 'whisper',
-            'language': result.get('language', 'unknown')
+            'service': 'OpenAI Whisper API',
+            'language': language
         }
     
     except Exception as e:
-        raise Exception(f"Error processing Whisper transcription: {str(e)}")
+        raise Exception(f"Error processing OpenAI Whisper API transcription: {str(e)}")
 
 
 @app.route('/')
@@ -372,21 +379,17 @@ def process_transcript():
                             print(f"Speaker diarization: {result.get('speaker_count', 0)} speakers detected")
                     
                     else:
-                        # Default to Whisper
-                        if not WHISPER_AVAILABLE:
-                            return jsonify({'success': False, 'error': 'Whisper is not installed. Please select ElevenLabs for transcription.'}), 400
-                        
-                        print("Transcribing with OpenAI Whisper (no speaker separation)...")
-                        model = whisper.load_model("base")
-                        result = model.transcribe(audio_file_path)
-                        text_content = result["text"]
+                        # Default to Whisper API
+                        print("Transcribing with OpenAI Whisper API (no speaker separation)...")
+                        result = transcribe_with_whisper(audio_file_path)
+                        text_content = result['text']
                         transcription_info = {
-                            'service': 'OpenAI Whisper',
+                            'service': result.get('service', 'OpenAI Whisper API'),
                             'has_speakers': False,
                             'speaker_count': 0,
-                            'language': result.get("language", "unknown")
+                            'language': result.get('language', 'unknown')
                         }
-                        print(f"Whisper transcription completed: {len(text_content)} characters")
+                        print(f"Whisper API transcription completed: {len(text_content)} characters")
                 
                 except Exception as e:
                     return jsonify({'error': f'Audio transcription failed: {str(e)}'}), 500

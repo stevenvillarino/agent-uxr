@@ -11,6 +11,13 @@
 
 **🎉 Latest Update (October 2, 2025):** Production ready with complete deployment automation! Web interface live, APIs validated, and deployment takes just 5 minutes with Cloudflare Tunnel.
 
+**🔧 Recent Fixes (October 6, 2025):** 
+- Fixed text analysis bug (was showing mock data)
+- Configured OpenAI Whisper API for audio transcription
+- No local installation needed, works with Python 3.13+
+
+📚 **Quick Links:** [Setup Guide](SETUP.md) | [Changelog](CHANGELOG.md) | [Full Docs](docs/)
+
 ---
 
 ## 🎯 **For UXR Teams: What This Solves**
