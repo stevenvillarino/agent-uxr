@@ -10,7 +10,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Initialize the OpenAI client
-client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+# This will use OPENAI_API_KEY from environment or .env file
+client = OpenAI()
 
 def transcribe_audio_with_whisper(audio_file_path: str) -> dict:
     """
@@ -69,24 +70,62 @@ def get_insights_from_llm(text_content: str, transcription_info: dict = None) ->
     Sends the transcript to an LLM to extract a summary and key themes.
     Enhanced to handle speaker information if available.
     """
-    # Enhanced prompt for speaker-aware analysis
+    # Enhanced prompt for UX-focused analysis
     if transcription_info and transcription_info.get("has_diarization"):
         system_prompt = """
-        You are an expert user research analyst. Your task is to analyze the provided
-        transcript that includes speaker identification and extract:
-        1. A concise summary (2-3 sentences)
-        2. The top 3-5 key themes
-        3. Speaker-specific insights if multiple speakers are detected
+        You are a senior UX researcher with expertise in user experience design and behavioral analysis.
         
-        Return the output as a valid JSON object with keys: "summary", "themes", and optionally "speaker_insights".
-        The "themes" value should be a list of strings.
+        Analyze this user research transcript with speaker identification. Focus on extracting specific, actionable UX insights:
+        
+        ANALYZE FOR:
+        - User pain points and specific frustrations mentioned
+        - Usability issues and interface problems
+        - User goals, motivations, and mental models
+        - Feature requests and improvement suggestions
+        - Accessibility concerns or barriers
+        - Workflow inefficiencies and friction points
+        - Positive user experiences and what works well
+        
+        AVOID generic statements. Be specific to what users actually said.
+        
+        Return JSON with:
+        - "summary": Executive summary highlighting critical UX findings (2-3 sentences)
+        - "themes": 4-6 specific, actionable UX themes (not generic statements)
+        - "pain_points": Top 3-5 specific user frustrations mentioned
+        - "recommendations": 3-4 concrete UX improvements prioritized by impact
+        - "speaker_insights": Key insights organized by speaker role if multiple speakers
         """
     else:
         system_prompt = """
-        You are an expert user research analyst. Your task is to analyze the provided
-        transcript and extract a concise summary and the top 3-5 key themes.
-        Return the output as a valid JSON object with two keys: "summary" and "themes".
-        The "themes" value should be a list of strings.
+        You are a senior UX researcher with expertise in user experience design and behavioral analysis.
+        
+        Analyze this user research transcript and extract specific, actionable UX insights grounded in what users actually said:
+        
+        CRITICAL ANALYSIS REQUIREMENTS:
+        1. QUOTE ACTUAL USER WORDS - Include direct quotes that support each insight
+        2. BE SPECIFIC - Avoid generic UX statements like "users want better navigation"
+        3. IDENTIFY ROOT CAUSES - Don't just list complaints, explain the underlying UX problems
+        4. PRIORITIZE BY IMPACT - Focus on issues that affect core user workflows
+        
+        ANALYZE FOR:
+        - Specific usability failures: "I clicked X expecting Y but got Z"
+        - Emotional reactions: frustration, confusion, delight expressed by users
+        - Mental model mismatches: where user expectations don't match interface behavior
+        - Workflow interruptions: specific points where users get stuck or lose efficiency
+        - Feature gaps: explicit requests for missing functionality
+        - Accessibility barriers: any mention of difficulty seeing, hearing, or interacting
+        - Success moments: what specifically works well and why
+        
+        EXAMPLE FORMAT FOR INSIGHTS:
+        Instead of: "Users want better navigation"
+        Write: "Users confused by 'Analytics' vs 'Insights' tabs - participant said 'I don't know what the difference is between Analytics and Insights - those feel like they could be the same thing' - suggests navigation taxonomy needs clarification"
+        
+        Return JSON with:
+        - "summary": 2-3 sentences highlighting the most critical UX findings with user impact
+        - "themes": 4-6 specific UX themes, each with supporting user quotes or examples
+        - "pain_points": Top 3-5 specific frustrations with exact user quotes
+        - "recommendations": 3-4 concrete UX improvements with rationale tied to user feedback
+        - "user_quotes": 5-8 most revealing direct quotes that illustrate key insights
         """
     
     try:
@@ -113,17 +152,25 @@ def get_insights_from_llm(text_content: str, transcription_info: dict = None) ->
 
 def format_marp_presentation(title: str, insights: dict) -> str:
     """
-    Formats the extracted insights into a Marp Markdown presentation string.
-    Enhanced to show diarization capabilities when available.
+    Formats the UX insights into a comprehensive Marp presentation.
+    Enhanced to show transcription capabilities and UX-specific content.
     """
-    if not insights or "summary" not in insights or "themes" not in insights:
+    if not insights or "summary" not in insights:
         return "# Error\n\nCould not generate presentation."
 
-    # Marp front-matter
-    content = f"---\nmarp: true\ntheme: default\n---\n\n"
+    # Marp front-matter with custom styling
+    content = """---
+marp: true
+theme: default
+class: invert
+paginate: true
+---
+
+<!-- _class: lead -->
+"""
     
     # Title Slide
-    content += f"# {title}\n\n"
+    content += f"# {title}\n## UX Research Insights\n\n"
     
     # Add transcription service info
     if insights.get("transcription_service"):
@@ -131,29 +178,71 @@ def format_marp_presentation(title: str, insights: dict) -> str:
         diarization = "✅ Speaker Separation" if insights.get("has_diarization") else "❌ No Speaker Separation"
         content += f"*Transcribed with {service} | {diarization}*\n\n"
     
-    content += "---\n\n"
+    content += "*Generated by Agent-UXR*\n\n---\n\n"
     
-    # Summary Slide
+    # Executive Summary
     content += f"## Executive Summary\n\n{insights['summary']}\n\n---\n\n"
     
-    # Theme Slides
-    content += "## Key Themes\n\n"
-    for i, theme in enumerate(insights['themes']):
-        content += f"{i+1}. {theme}\n"
+    # Key Themes
+    if "themes" in insights:
+        content += "## Key UX Themes\n\n"
+        for i, theme in enumerate(insights['themes'], 1):
+            content += f"### {i}. {theme}\n\n"
+        content += "---\n\n"
+    
+    # Pain Points
+    if "pain_points" in insights:
+        content += "## 🚨 Critical Pain Points\n\n"
+        for i, pain in enumerate(insights['pain_points'], 1):
+            content += f"**{i}.** {pain}\n\n"
+        content += "---\n\n"
+    
+    # Recommendations
+    if "recommendations" in insights:
+        content += "## 💡 Prioritized Recommendations\n\n"
+        for i, rec in enumerate(insights['recommendations'], 1):
+            content += f"### {i}. {rec}\n\n"
+        content += "---\n\n"
+    
+    # User Quotes
+    if "user_quotes" in insights:
+        content += "## 💬 Key User Quotes\n\n"
+        for i, quote in enumerate(insights['user_quotes'], 1):
+            content += f"> \"{quote}\"\n\n"
+        content += "---\n\n"
     
     # Speaker insights if available
     if insights.get("speaker_insights"):
-        content += "\n---\n\n## Speaker Insights\n\n"
+        content += "## 👥 Speaker-Specific Insights\n\n"
         for speaker_insight in insights["speaker_insights"]:
-            content += f"- {speaker_insight}\n"
+            content += f"- {speaker_insight}\n\n"
+        content += "---\n\n"
     
-    # Add capability note
-    content += "\n---\n\n## Transcription Capabilities\n\n"
-    content += "| Service | Transcription | Speaker Diarization |\n"
-    content += "|---------|---------------|--------------------|\n"
-    content += "| OpenAI Whisper | ✅ Excellent | ❌ Not Available |\n"
-    content += "| AWS Transcribe | ✅ Good | ✅ Available |\n"
-    content += "| Azure Speech | ✅ Good | ✅ Available |\n"
+    # Next Steps
+    content += """## Next Steps
+
+1. **Prioritize** critical pain points for immediate fixes
+2. **Prototype** top recommended solutions  
+3. **Validate** changes with follow-up user testing
+4. **Measure** impact with analytics and user feedback
+
+---
+
+## Transcription Capabilities
+
+| Service | Transcription | Speaker Diarization |
+|---------|---------------|---------------------|
+| OpenAI Whisper | ✅ Excellent | ❌ Not Available |
+| AWS Transcribe | ✅ Good | ✅ Available |
+| Azure Speech | ✅ Good | ✅ Available |
+
+---
+
+<!-- _class: lead -->
+
+## Questions?
+
+*Ready for actionable UX improvements*"""
     
     return content
 
