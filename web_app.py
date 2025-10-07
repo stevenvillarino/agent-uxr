@@ -176,39 +176,297 @@ def transcribe_with_elevenlabs(audio_file_path, enable_diarization=True):
             raise Exception(f"Error processing ElevenLabs transcription: {str(e)}")
 
 
-def transcribe_with_whisper(audio_file_path):
+def get_file_size_mb(file_path):
+    """Get file size in MB"""
+    size_bytes = os.path.getsize(file_path)
+    return size_bytes / (1024 * 1024)
+
+def compress_audio_file(input_path, max_size_mb=20):
     """
-    Transcribe audio using OpenAI Whisper API (cloud-based).
-    This uses the OpenAI API instead of a local model, which is:
-    - Faster and more reliable
-    - No local installation required
-    - Works with Python 3.13+
-    - Affordable ($0.006/minute)
+    Compress audio file to reduce size while maintaining quality.
+    Uses ffmpeg to compress large files for API compatibility.
     """
     try:
-        print(f"Transcribing audio file with OpenAI Whisper API: {audio_file_path}")
+        import subprocess
         
-        with open(audio_file_path, "rb") as audio_file:
-            transcript = client.audio.transcriptions.create(
-                model="whisper-1",
-                file=audio_file,
-                response_format="verbose_json"  # Get language info
-            )
+        # Generate compressed file path
+        base_name = os.path.splitext(input_path)[0]
+        compressed_path = f"{base_name}_compressed.mp3"
         
-        # Extract text and language from response
-        text = transcript.text if hasattr(transcript, 'text') else str(transcript)
-        language = transcript.language if hasattr(transcript, 'language') else 'unknown'
+        print(f"🗜️ Compressing {input_path} to {compressed_path}")
+        
+        # Use ffmpeg to compress - reduce bitrate while maintaining quality
+        cmd = [
+            'ffmpeg', '-i', input_path,
+            '-acodec', 'mp3',
+            '-ab', '64k',  # Lower bitrate for smaller size
+            '-ar', '16000',  # Lower sample rate (16kHz is fine for speech)
+            '-ac', '1',  # Convert to mono
+            '-y',  # Overwrite output file
+            compressed_path
+        ]
+        
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        
+        if result.returncode != 0:
+            raise Exception(f"FFmpeg compression failed: {result.stderr}")
+        
+        # Check if compression was successful
+        if os.path.exists(compressed_path):
+            compressed_size = get_file_size_mb(compressed_path)
+            original_size = get_file_size_mb(input_path)
+            print(f"✅ Compression successful: {original_size:.1f}MB → {compressed_size:.1f}MB")
+            return compressed_path
+        else:
+            raise Exception("Compressed file was not created")
+            
+    except FileNotFoundError:
+        raise Exception("FFmpeg not found. Please install FFmpeg for large file support: brew install ffmpeg")
+    except Exception as e:
+        raise Exception(f"Audio compression failed: {str(e)}")
+
+def transcribe_with_local_whisper(audio_file_path):
+    """
+    Transcribe audio using local Whisper model.
+    Used as fallback for large files that exceed API limits.
+    """
+    try:
+        import whisper
+        
+        print(f"🎤 Using local Whisper for large file: {audio_file_path}")
+        
+        # Load the model (base is good balance of speed/accuracy)
+        model = whisper.load_model("base")
+        
+        # Transcribe with language detection
+        result = model.transcribe(audio_file_path, verbose=False)
         
         return {
-            'text': text.strip(),
-            'has_speakers': False,  # Whisper doesn't provide speaker diarization
+            'text': result['text'].strip(),
+            'has_speakers': False,
             'speaker_count': 0,
-            'service': 'OpenAI Whisper API',
-            'language': language
+            'service': 'Local Whisper (Large File)',
+            'language': result.get('language', 'unknown')
         }
+        
+    except ImportError:
+        raise Exception("Local Whisper not available. Please install: pip install openai-whisper")
+    except Exception as e:
+        raise Exception(f"Local Whisper transcription failed: {str(e)}")
+
+def transcribe_with_chunking(audio_file_path, chunk_duration_minutes=10):
+    """
+    Transcribe large audio files by chunking them and combining results.
+    Used for files that are too large for API limits.
+    """
+    try:
+        import subprocess
+        
+        print(f"🎬 Starting chunked transcription for large file")
+        
+        # Create chunks directory
+        chunks_dir = os.path.join(os.path.dirname(__file__), "temp_chunks")
+        os.makedirs(chunks_dir, exist_ok=True)
+        
+        # Get audio duration
+        try:
+            cmd = ['ffprobe', '-v', 'quiet', '-show_entries', 'format=duration', '-of', 'csv=p=0', audio_file_path]
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            total_duration = float(result.stdout.strip())
+        except Exception as e:
+            raise Exception(f"Could not get audio duration: {e}")
+        
+        chunk_duration_seconds = chunk_duration_minutes * 60
+        num_chunks = int((total_duration / chunk_duration_seconds)) + 1
+        
+        print(f"🎵 Audio duration: {total_duration/60:.1f} minutes")
+        print(f"✂️ Creating {num_chunks} chunks of {chunk_duration_minutes} minutes each...")
+        
+        chunk_files = []
+        base_name = os.path.splitext(os.path.basename(audio_file_path))[0]
+        
+        # Create chunks
+        for i in range(num_chunks):
+            start_time = i * chunk_duration_seconds
+            if start_time >= total_duration:
+                break
+                
+            chunk_filename = f"{base_name}_chunk_{i+1:02d}.mp3"
+            chunk_path = os.path.join(chunks_dir, chunk_filename)
+            
+            cmd = [
+                'ffmpeg', '-i', audio_file_path,
+                '-ss', str(start_time), '-t', str(chunk_duration_seconds),
+                '-acodec', 'mp3', '-ab', '128k', '-ar', '22050', '-y', chunk_path
+            ]
+            
+            print(f"📦 Creating chunk {i+1}/{num_chunks}")
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            
+            if result.returncode == 0 and os.path.exists(chunk_path):
+                chunk_files.append(chunk_path)
+            else:
+                print(f"❌ Failed to create chunk {i+1}")
+        
+        if not chunk_files:
+            raise Exception("No chunks were created")
+        
+        # Transcribe chunks
+        combined_transcript = []
+        chunk_info = []
+        
+        print(f"📝 Transcribing {len(chunk_files)} chunks...")
+        
+        for i, chunk_file in enumerate(chunk_files, 1):
+            print(f"🎤 Processing chunk {i}/{len(chunk_files)}")
+            
+            try:
+                with open(chunk_file, "rb") as audio_file:
+                    transcript = client.audio.transcriptions.create(
+                        model="whisper-1",
+                        file=audio_file,
+                        response_format="verbose_json"
+                    )
+                
+                chunk_text = transcript.text if hasattr(transcript, 'text') else str(transcript)
+                combined_transcript.append(f"[Chunk {i}] {chunk_text}")
+                
+                chunk_info.append({
+                    'chunk': i,
+                    'duration': f"{(i-1)*chunk_duration_minutes}-{i*chunk_duration_minutes} min",
+                    'text_length': len(chunk_text),
+                    'language': transcript.language if hasattr(transcript, 'language') else 'unknown'
+                })
+                
+                print(f"✅ Chunk {i} completed: {len(chunk_text)} characters")
+                
+            except Exception as e:
+                print(f"❌ Chunk {i} failed: {e}")
+                combined_transcript.append(f"[Chunk {i}] [TRANSCRIPTION FAILED: {str(e)}]")
+        
+        # Clean up chunk files
+        for chunk_file in chunk_files:
+            try:
+                if os.path.exists(chunk_file):
+                    os.unlink(chunk_file)
+            except Exception as e:
+                print(f"⚠️ Could not clean up {chunk_file}: {e}")
+        
+        # Remove temp directory if empty
+        try:
+            os.rmdir(chunks_dir)
+        except:
+            pass
+        
+        # Combine all transcripts
+        full_transcript = "\n\n".join(combined_transcript)
+        
+        print(f"🎉 Chunked transcription completed: {len(full_transcript)} total characters")
+        
+        return {
+            'text': full_transcript,
+            'has_speakers': False,
+            'speaker_count': 0,
+            'service': f'OpenAI Whisper API (Chunked - {len(chunk_files)} parts)',
+            'language': chunk_info[0]['language'] if chunk_info else 'unknown',
+            'chunk_info': chunk_info
+        }
+        
+    except Exception as e:
+        raise Exception(f"Chunked transcription failed: {str(e)}")
+
+def transcribe_with_whisper(audio_file_path):
+    """
+    Smart transcription that handles both small and large files:
+    1. Try OpenAI API for files under 25MB (faster, cloud-based)
+    2. For larger files, try compression first
+    3. If still too large, use chunking (break into small pieces)
+    4. As last resort, use local Whisper (no size limit)
+    """
+    try:
+        file_size_mb = get_file_size_mb(audio_file_path)
+        print(f"📁 Audio file size: {file_size_mb:.1f}MB")
+        
+        # Strategy 1: Direct API call for small files
+        if file_size_mb <= 24:  # Leave 1MB buffer
+            print(f"📡 Using OpenAI Whisper API (file under 25MB)")
+            
+            with open(audio_file_path, "rb") as audio_file:
+                transcript = client.audio.transcriptions.create(
+                    model="whisper-1",
+                    file=audio_file,
+                    response_format="verbose_json"
+                )
+            
+            text = transcript.text if hasattr(transcript, 'text') else str(transcript)
+            language = transcript.language if hasattr(transcript, 'language') else 'unknown'
+            
+            return {
+                'text': text.strip(),
+                'has_speakers': False,
+                'speaker_count': 0,
+                'service': 'OpenAI Whisper API',
+                'language': language
+            }
+        
+        # Strategy 2: Compress and try API
+        elif file_size_mb <= 100:  # Reasonable compression limit
+            print(f"🗜️ File too large for API ({file_size_mb:.1f}MB). Attempting compression...")
+            
+            try:
+                compressed_file = compress_audio_file(audio_file_path)
+                compressed_size = get_file_size_mb(compressed_file)
+                
+                if compressed_size <= 24:
+                    print(f"✅ Compressed file fits API limit, using OpenAI API")
+                    
+                    with open(compressed_file, "rb") as audio_file:
+                        transcript = client.audio.transcriptions.create(
+                            model="whisper-1",
+                            file=audio_file,
+                            response_format="verbose_json"
+                        )
+                    
+                    # Clean up compressed file
+                    os.unlink(compressed_file)
+                    
+                    text = transcript.text if hasattr(transcript, 'text') else str(transcript)
+                    language = transcript.language if hasattr(transcript, 'language') else 'unknown'
+                    
+                    return {
+                        'text': text.strip(),
+                        'has_speakers': False,
+                        'speaker_count': 0,
+                        'service': 'OpenAI Whisper API (Compressed)',
+                        'language': language
+                    }
+                else:
+                    print(f"❌ Compressed file still too large ({compressed_size:.1f}MB), using chunking")
+                    os.unlink(compressed_file)  # Clean up
+                    return transcribe_with_chunking(audio_file_path)
+                    
+            except Exception as compression_error:
+                print(f"⚠️ Compression failed: {compression_error}")
+                print(f"🔄 Falling back to chunking")
+                return transcribe_with_chunking(audio_file_path)
+        
+        # Strategy 3: Chunking for very large files
+        else:
+            print(f"📁 Very large file ({file_size_mb:.1f}MB), using chunking approach")
+            return transcribe_with_chunking(audio_file_path)
     
     except Exception as e:
-        raise Exception(f"Error processing OpenAI Whisper API transcription: {str(e)}")
+        # If all else fails, try local Whisper or chunking as last resort
+        if "413" in str(e) or "Maximum content size" in str(e):
+            print(f"🔄 API size limit hit, trying chunking approach")
+            return transcribe_with_chunking(audio_file_path)
+        else:
+            # Final fallback: try local Whisper if available
+            try:
+                print(f"🔄 Falling back to local Whisper processing")
+                return transcribe_with_local_whisper(audio_file_path)
+            except Exception as local_error:
+                raise Exception(f"All transcription methods failed. API error: {str(e)}, Local error: {str(local_error)}")
 
 
 @app.route('/')
@@ -360,8 +618,18 @@ def process_transcript():
                 audio_file_path = os.path.join(UPLOAD_FOLDER, f"audio_{uuid.uuid4().hex[:8]}{os.path.splitext(filename)[1]}")
                 file.save(audio_file_path)
                 
-                print(f"Processing audio file: {filename}")
-                print(f"Using service: {service_type}")
+                # Check file size and inform user of processing strategy
+                file_size_mb = get_file_size_mb(audio_file_path)
+                print(f"📁 Processing audio file: {filename} ({file_size_mb:.1f}MB)")
+                print(f"🔧 Using service: {service_type}")
+                
+                # Inform user about processing strategy based on file size
+                if file_size_mb <= 24:
+                    print(f"✅ File size suitable for fast API processing")
+                elif file_size_mb <= 100:
+                    print(f"⚠️ Large file detected - will attempt compression then fallback to local processing if needed")
+                else:
+                    print(f"📁 Very large file - will use local Whisper processing (may take longer)")
                 
                 try:
                     if service_type == 'elevenlabs' and enable_diarization:
@@ -379,8 +647,8 @@ def process_transcript():
                             print(f"Speaker diarization: {result.get('speaker_count', 0)} speakers detected")
                     
                     else:
-                        # Default to Whisper API
-                        print("Transcribing with OpenAI Whisper API (no speaker separation)...")
+                        # Use smart Whisper processing (handles all file sizes)
+                        print("Transcribing with smart Whisper processing...")
                         result = transcribe_with_whisper(audio_file_path)
                         text_content = result['text']
                         transcription_info = {
