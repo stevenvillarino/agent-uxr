@@ -565,18 +565,25 @@ def transcribe_only():
             return jsonify({'error': 'No content provided. Please upload a file or paste text.'}), 400
         
         # Analyze transcript for speaker information (in case speakers were manually added)
-        if '[Speaker' in text_content or any(line.strip().endswith(':') for line in text_content.split('\n')[:10]):
-            speaker_matches = re.findall(r'\[(Speaker \d+|[^:\]]+)\]:|^([^:\n]+):', text_content, re.MULTILINE)
+        # Check for speaker patterns like "Speaker:" or "[Speaker 1]:"
+        speaker_patterns = [
+            r'^\[?(Speaker \d+|[^:\[\]]+)\]?:\s',  # Matches "Speaker:" or "[Speaker 1]:" at line start
+            r'^([^:\n]+):\s',  # Simple pattern for "Name:" at line start
+        ]
+        
+        unique_speakers = set()
+        for pattern in speaker_patterns:
+            speaker_matches = re.findall(pattern, text_content, re.MULTILINE)
             if speaker_matches:
-                unique_speakers = set()
-                for match in speaker_matches:
-                    speaker = match[0] if match[0] else match[1]
-                    if speaker.strip():
+                for speaker in speaker_matches:
+                    if isinstance(speaker, tuple):
+                        speaker = speaker[0] if speaker[0] else speaker[1]
+                    if speaker.strip() and len(speaker.strip()) > 0:
                         unique_speakers.add(speaker.strip())
-                
-                if len(unique_speakers) > 1:
-                    transcription_info['has_speakers'] = True
-                    transcription_info['speaker_count'] = len(unique_speakers)
+        
+        if len(unique_speakers) > 1:
+            transcription_info['has_speakers'] = True
+            transcription_info['speaker_count'] = len(unique_speakers)
         
         # Return just the transcript data for preview
         return jsonify({
