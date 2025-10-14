@@ -1,0 +1,52 @@
+# Docker files
+Dockerfile
+docker-compose.yml
+
+# Environment and secrets
+.env
+.env.local
+.env.production
+
+# Python cache and virtual environments
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+env/
+.venv/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+temp/
+tmp/
+*.tmp
+
+# Output files (keep structure but ignore generated content)
+outputs/*.md
+outputs/*.html
+outputs/*.pdf
+!outputs/.gitkeep
+
+# Node modules (if any)
+node_modules/
+
+# PyTorch models cache
+.cache/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/

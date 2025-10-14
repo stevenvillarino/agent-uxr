@@ -16,7 +16,7 @@
 - Configured OpenAI Whisper API for audio transcription
 - No local installation needed, works with Python 3.13+
 
-📚 **Quick Links:** [Setup Guide](SETUP.md) | [Changelog](CHANGELOG.md) | [Full Docs](docs/)
+📚 **Quick Links:** [Docker Setup](DOCKER_SETUP.md) | [Setup Guide](SETUP.md) | [Changelog](CHANGELOG.md) | [Full Docs](docs/)
 
 ---
 
@@ -165,7 +165,23 @@ timeline
 
 ## 🎪 **Live Demo & Quick Start**
 
-### **Option 1: Web Interface (Recommended)**
+### **Option 1: Docker (Zero Install) 🐳** 
+```bash
+# 1. Clone repository
+git clone https://github.com/stevenvillarino/agent-uxr.git
+cd agent-uxr
+
+# 2. Set API key and run
+echo "OPENAI_API_KEY=your_api_key_here" > .env
+docker compose up
+
+# 3. Open browser
+open http://localhost:8080
+```
+**Perfect for:** Demos, client presentations, quick testing  
+**Requirements:** Just Docker - no Python installation needed!
+
+### **Option 2: Local Python Setup**
 ```bash
 # 1. Clone repository
 git clone https://github.com/stevenvillarino/agent-uxr.git
@@ -190,7 +206,7 @@ open http://localhost:8080
 - **ElevenLabs:** Optional for speaker diarization ([Get API Key](https://elevenlabs.io/))
 - **Web Settings:** Configure keys through the web interface settings panel
 
-### **Option 2: Command Line**
+### **Option 3: Command Line**
 ```bash
 # Process a research transcript
 python main.py sample_data/user_interview_dashboard.txt
