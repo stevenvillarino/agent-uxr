@@ -5,8 +5,9 @@
 **For people who just want to demo without installing anything:**
 
 ### Prerequisites
+
 - Docker and Docker Compose installed ([Get Docker](https://docs.docker.com/get-docker/))
-- OpenAI API Key (get from [OpenAI Platform](https://platform.openai.com/api-keys))
+- Roku OpenAI API Key (get from [OpenAI Platform](https://platform.openai.com/api-keys))
 
 ### Super Quick Start (3 steps)
 
@@ -16,9 +17,9 @@
    cd agent-uxr
    ```
 
-2. **Set your OpenAI API key:**
+2. **Set your Roku OpenAI API key:**
    ```bash
-   echo "OPENAI_API_KEY=your_api_key_here" > .env
+   echo "OPENAI_API_KEY=your_roku_openai_api_key_here" > .env
    ```
 
 3. **Run the demo:**
@@ -39,7 +40,7 @@ docker build -t insightdeck-agent .
 docker run -p 8080:8080 --env-file .env insightdeck-agent
 
 # Or run with inline environment variable
-docker run -p 8080:8080 -e OPENAI_API_KEY=your_key_here insightdeck-agent
+docker run -p 8080:8080 -e OPENAI_API_KEY=your_roku_key_here insightdeck-agent
 ```
 
 ### Features Available in Docker
@@ -81,7 +82,7 @@ docker run -p 3000:8080 --env-file .env insightdeck-agent
 ```bash
 # Check your .env file
 cat .env
-# Should show: OPENAI_API_KEY=sk-...
+# Should show: OPENAI_API_KEY=sk-... (your Roku OpenAI key)
 ```
 
 ---

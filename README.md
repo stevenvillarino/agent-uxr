@@ -172,14 +172,15 @@ git clone https://github.com/stevenvillarino/agent-uxr.git
 cd agent-uxr
 
 # 2. Set API key and run
-echo "OPENAI_API_KEY=your_api_key_here" > .env
+echo "OPENAI_API_KEY=your_roku_openai_api_key_here" > .env
 docker compose up
 
 # 3. Open browser
 open http://localhost:8080
 ```
 **Perfect for:** Demos, client presentations, quick testing  
-**Requirements:** Just Docker - no Python installation needed!
+**Requirements:** Just Docker - no Python installation needed!  
+**Note:** Use your Roku organization's OpenAI API key for access
 
 ### **Option 2: Local Python Setup**
 ```bash
@@ -191,7 +192,7 @@ cd agent-uxr
 pip install -r requirements.txt
 
 # 3. Set up API keys
-export OPENAI_API_KEY='your-openai-api-key-here'
+export OPENAI_API_KEY='your-roku-openai-api-key-here'
 export ELEVENLABS_API_KEY='your-elevenlabs-api-key-here'  # Optional for speaker diarization
 
 # 4. Launch web app
@@ -202,7 +203,7 @@ open http://localhost:8080
 ```
 
 **🔧 API Key Setup:**
-- **OpenAI:** Required for AI analysis ([Get API Key](https://platform.openai.com/api-keys))
+- **OpenAI:** Required for AI analysis ([Get Roku OpenAI API Key](https://platform.openai.com/api-keys))
 - **ElevenLabs:** Optional for speaker diarization ([Get API Key](https://elevenlabs.io/))
 - **Web Settings:** Configure keys through the web interface settings panel
 
