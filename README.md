@@ -333,11 +333,11 @@ flowchart TB
 
 | Document | Purpose | Audience |
 |----------|---------|----------|
-| **[📋 PRD.md](./PRD.md)** | Product requirements & vision | Product teams |
-| **[🏗 ARCHITECTURE.md](./ARCHITECTURE.md)** | Technical architecture | Engineering teams |
-| **[⚙️ FEATURES.md](./FEATURES.md)** | Feature specifications | All stakeholders |
-| **[� UX.md](./UX.md)** | User experience design | UX/UI teams |
-| **[📈 TRANSCRIPTION_COMPARISON.md](./TRANSCRIPTION_COMPARISON.md)** | Service comparisons | Technical teams |
+| **[📋 PRD.md](./docs/product/PRD.md)** | Product requirements & vision | Product teams |
+| **[🏗 ARCHITECTURE.md](./docs/guides/ARCHITECTURE.md)** | Technical architecture | Engineering teams |
+| **[⚙️ FEATURES.md](./docs/product/FEATURES.md)** | Feature specifications | All stakeholders |
+| **[👩‍💻 UX.md](./docs/guides/UX.md)** | User experience design | UX/UI teams |
+| **[📈 TRANSCRIPTION_COMPARISON.md](./docs/guides/TRANSCRIPTION_COMPARISON.md)** | Service comparisons | Technical teams |
 
 ---
 
