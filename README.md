@@ -116,24 +116,30 @@ flowchart TD
 ### **Current Architecture**
 
 ```mermaid
-architecture-beta
-    group web(logos:chrome)[Web Interface]
-    group backend(logos:python)[Python Backend]
-    group ai(logos:openai)[AI Services]
-    group storage(logos:files)[File Storage]
-    
-    service webapp(logos:flask)[Flask Web App] in web
-    service api(logos:fastapi)[API Layer] in backend
-    service processor(logos:python)[Content Processor] in backend
-    service gpt(logos:openai)[GPT-4o] in ai
-    service whisper(logos:openai)[Whisper STT] in ai
-    service files(logos:folder)[Local Storage] in storage
-    
-    webapp:R --> L:api
-    api:R --> L:processor
-    processor:R --> L:gpt
-    processor:R --> L:whisper
-    processor:R --> L:files
+graph TD
+    subgraph "Web Interface"
+        webapp["Flask Web App"]
+    end
+
+    subgraph "Python Backend"
+        api["API Layer"]
+        processor["Content Processor"]
+    end
+
+    subgraph "AI Services"
+        gpt["GPT-4o"]
+        whisper["Whisper STT"]
+    end
+
+    subgraph "File Storage"
+        files["Local Storage"]
+    end
+
+    webapp --> api
+    api --> processor
+    processor --> gpt
+    processor --> whisper
+    processor --> files
 ```
 
 ### **Technology Stack**

@@ -27,7 +27,7 @@ pip install -r requirements.txt
 python web_app.py
 ```
 
-Then open: http://localhost:5000
+Then open: http://localhost:8080
 
 ## Troubleshooting
 
