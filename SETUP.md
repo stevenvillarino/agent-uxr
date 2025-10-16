@@ -1,3 +1,5 @@
+> **Note:** This document is for troubleshooting the local Python setup. For the recommended and easiest setup, please see the **[Getting Started guide in the README.md](README.md)** which uses Docker.
+
 # Setup & Troubleshooting Guide
 
 ## Quick Start

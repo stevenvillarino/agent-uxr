@@ -1,22 +1,45 @@
 # 🔬 InsightDeck Agent
 ## AI-Powered Research Synthesis & Presentation Automation
 
-> **Transform user research data into professional presentations in minutes, not hours**
+> **Transform user research data into professional presentations in minutes, not hours.**
 
 [![Python 3.8+](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
 [![OpenAI](https://img.shields.io/badge/AI-OpenAI%20GPT--4o-green.svg)](https://openai.com)
-[![ElevenLabs](https://img.shields.io/badge/Audio-ElevenLabs%20STT-purple.svg)](https://elevenlabs.io)
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](DOCKER_SETUP.md)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen.svg)]()
 
-**🎉 Latest Update (October 2, 2025):** Production ready with complete deployment automation! Web interface live, APIs validated, and deployment takes just 5 minutes with Cloudflare Tunnel.
+**🎉 Latest Update (October 6, 2025):** Dockerized for zero-dependency setup and fixed critical bugs.
 
-**🔧 Recent Fixes (October 6, 2025):** 
-- Fixed text analysis bug (was showing mock data)
-- Configured OpenAI Whisper API for audio transcription
-- No local installation needed, works with Python 3.13+
+---
 
-📚 **Quick Links:** [Docker Setup](DOCKER_SETUP.md) | [Setup Guide](SETUP.md) | [Changelog](CHANGELOG.md) | [Full Docs](docs/)
+## 🚀 Getting Started (Recommended)
+
+This project is designed to run in Docker to provide a consistent, dependency-free experience. This is the fastest and easiest way to get started.
+
+**Prerequisites:**
+- [Docker](https://docs.docker.com/get-docker/) installed.
+- An [OpenAI API Key](https://platform.openai.com/api-keys).
+
+### **3-Step Docker Setup**
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/stevenvillarino/agent-uxr.git
+    cd agent-uxr
+    ```
+
+2.  **Set your API key:**
+    ```bash
+    echo "OPENAI_API_KEY=your_openai_api_key_here" > .env
+    ```
+
+3.  **Run with Docker Compose:**
+    ```bash
+    docker compose up
+    ```
+
+That's it! The application will be available at **http://localhost:8080**.
 
 ---
 
