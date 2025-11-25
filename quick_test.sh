@@ -6,7 +6,7 @@
 set -e  # Exit on error
 
 echo "============================================================================="
-echo "InsightDeck Agent - Quick Start Test"
+echo "UXR Synthesizer - Quick Start Test"
 echo "============================================================================="
 echo ""
 

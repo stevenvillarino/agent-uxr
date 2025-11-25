@@ -1,4 +1,4 @@
-# 🔬 InsightDeck Agent
+# 🔬 UXR Synthesizer
 ## AI-Powered Research Synthesis & Presentation Automation
 
 > **Transform user research data into professional presentations in minutes, not hours.**
@@ -45,7 +45,7 @@ That's it! The application will be available at **http://localhost:8080**.
 
 ## 🎯 **For UXR Teams: What This Solves**
 
-User Experience Researchers spend **60-80% of their time** on manual data synthesis and presentation creation instead of generating insights. InsightDeck Agent automates this workflow, transforming research transcripts into professional presentation decks in minutes.
+User Experience Researchers spend **60-80% of their time** on manual data synthesis and presentation creation instead of generating insights. UXR Synthesizer automates this workflow, transforming research transcripts into professional presentation decks in minutes.
 
 ### 🎧 **Advanced Audio Processing**
 - **Dual Transcription Engines:** Choose between OpenAI Whisper or ElevenLabs Speech-to-Text
@@ -70,7 +70,7 @@ flowchart LR
 ```
 
 **Traditional Process:** 4-6 hours per interview  
-**With InsightDeck:** 15 minutes per interview  
+**With UXR Synthesizer:** 15 minutes per interview
 **Time Savings:** 85% reduction in synthesis time
 
 ---
@@ -256,7 +256,7 @@ python main.py sample_data/user_interview_dashboard.txt
 
 ### **⏰ Time Efficiency**
 - **Traditional:** 4-6 hours per interview synthesis
-- **With InsightDeck:** 15 minutes per interview
+- **With UXR Synthesizer:** 15 minutes per interview
 - **Annual Savings:** 200+ hours per researcher
 
 ### **📊 Consistency & Quality**

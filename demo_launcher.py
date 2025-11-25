@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-InsightDeck Agent Demo Launcher
+UXR Synthesizer Demo Launcher
 This script launches the demo with sample data and placeholder functionality
 """
 
@@ -21,13 +21,13 @@ def demo_page():
     return """
     <html>
     <head>
-        <title>InsightDeck Agent - Demo Mode</title>
+        <title>UXR Synthesizer - Demo Mode</title>
         <script src="https://cdn.tailwindcss.com"></script>
     </head>
     <body class="bg-gray-50 min-h-screen">
         <div class="container mx-auto px-4 py-8">
             <div class="text-center mb-8">
-                <h1 class="text-4xl font-bold text-gray-900 mb-4">🎯 InsightDeck Agent</h1>
+                <h1 class="text-4xl font-bold text-gray-900 mb-4">🔬 UXR Synthesizer</h1>
                 <p class="text-xl text-gray-600 mb-6">AI-Powered Research Synthesis & Presentation Automation</p>
                 <div class="bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-3 rounded mb-6">
                     <strong>Demo Mode:</strong> To process actual files, please set up your OpenAI API key in the .env file
@@ -168,7 +168,7 @@ def demo_page():
     """
 
 if __name__ == '__main__':
-    print("🎯 InsightDeck Agent Demo")
+    print("🔬 UXR Synthesizer Demo")
     print("=" * 50)
     print("🚀 Starting demo server...")
     print("📱 Open: http://localhost:8080")

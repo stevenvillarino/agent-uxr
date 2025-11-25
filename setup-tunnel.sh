@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# InsightDeck Agent - Cloudflare Tunnel Setup Script
+# UXR Synthesizer - Cloudflare Tunnel Setup Script
 # This script helps you set up Cloudflare Tunnel for secure deployment
 
 set -e
 
-echo "🚀 InsightDeck Agent - Cloudflare Tunnel Setup"
+echo "🚀 UXR Synthesizer - Cloudflare Tunnel Setup"
 echo "=============================================="
 echo ""
 

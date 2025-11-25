@@ -1,4 +1,4 @@
-# Changelog - InsightDeck Agent
+# Changelog - UXR Synthesizer
 
 ## October 6, 2025
 
