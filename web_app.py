@@ -8,7 +8,7 @@ import requests
 import re
 from datetime import datetime
 from openai import OpenAI
-from main import get_insights_from_llm, format_marp_presentation
+from main_enhanced import get_insights_from_llm, format_marp_presentation
 from dotenv import load_dotenv
 
 # Note: We use OpenAI Whisper API (cloud-based) instead of local whisper package
