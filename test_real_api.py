@@ -22,8 +22,8 @@ def check_api_key_setup():
     if not api_key:
         print("❌ No OPENAI_API_KEY found in environment")
         return False
-    elif api_key == "your_openai_api_key_here":
-        print("❌ API key is still the placeholder")
+    elif "your_" in api_key.lower():
+        print("❌ API key is still a placeholder")
         print("📝 You need to:")
         print("   1. Get API key from: https://platform.openai.com/api-keys")
         print("   2. Edit .env file: nano .env")

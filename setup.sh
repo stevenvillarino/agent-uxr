@@ -111,7 +111,7 @@ fi
 
 # Check if OpenAI API key is set
 print_status "Checking OpenAI API configuration..."
-if grep -q "your_openai_api_key_here" .env 2>/dev/null; then
+if grep -qi "your_" .env 2>/dev/null; then
     print_warning "OpenAI API key is not configured in .env file"
     print_status "The demo will not work until you add your API key"
 else

@@ -61,11 +61,8 @@ def transcribe_with_elevenlabs(audio_file_path, enable_diarization=True):
     Returns: dict with transcription results and speaker information
     """
     api_key = os.getenv('ELEVENLABS_API_KEY')
-    if not api_key:
-        raise ValueError("ElevenLabs API key not found. Please set ELEVENLABS_API_KEY environment variable.")
-    
-    if api_key == 'your_elevenlabs_api_key_here':
-        raise ValueError("Please update your ElevenLabs API key in the .env file.")
+    if not api_key or "your_" in api_key.lower():
+        raise ValueError("ElevenLabs API key not found or still set to placeholder. Please set ELEVENLABS_API_KEY in the .env file.")
     
     url = "https://api.elevenlabs.io/v1/speech-to-text/convert"
     
@@ -1249,8 +1246,8 @@ def get_config():
         elevenlabs_masked = elevenlabs_key[:8] + '...' + elevenlabs_key[-4:]
     
     return jsonify({
-        'openai_configured': bool(openai_key and openai_key != 'your_openai_api_key_here'),
-        'elevenlabs_configured': bool(elevenlabs_key and elevenlabs_key != 'your_elevenlabs_api_key_here'),
+        'openai_configured': bool(openai_key and "your_" not in openai_key.lower()),
+        'elevenlabs_configured': bool(elevenlabs_key and "your_" not in elevenlabs_key.lower()),
         'openai_key_preview': openai_masked,
         'elevenlabs_key_preview': elevenlabs_masked
     })
@@ -1315,7 +1312,7 @@ def test_openai():
         if not api_key:
             api_key = os.getenv('OPENAI_API_KEY', '')
         
-        if not api_key or api_key == 'your_openai_api_key_here':
+        if not api_key or "your_" in api_key.lower():
             return jsonify({'error': 'No valid OpenAI API key provided'})
         
         # Test the API key with a simple request
@@ -1348,7 +1345,7 @@ def test_elevenlabs():
         if not api_key:
             api_key = os.getenv('ELEVENLABS_API_KEY', '')
         
-        if not api_key or api_key == 'your_elevenlabs_api_key_here':
+        if not api_key or "your_" in api_key.lower():
             return jsonify({'error': 'No valid ElevenLabs API key provided'})
         
         # Test the API key with a simple request to get user info
