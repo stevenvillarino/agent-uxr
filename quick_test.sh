@@ -22,7 +22,7 @@ if [ ! -f .env ]; then
 fi
 
 # Check if OpenAI key is configured
-if grep -q "your_openai_api_key_here" .env; then
+if grep -qi "your_" .env; then
     echo "❌ OpenAI API key not configured!"
     echo ""
     echo "Please edit .env and replace 'your_openai_api_key_here' with your actual key"

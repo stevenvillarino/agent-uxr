@@ -36,7 +36,7 @@ def main():
     
     # Check for API key
     api_key = os.getenv('OPENAI_API_KEY')
-    if not api_key or api_key == 'your_openai_api_key_here':
+    if not api_key or "your_" in api_key.lower():
         print("\n❌ ERROR: OPENAI_API_KEY not set in .env file")
         print("\nPlease:")
         print("1. Copy .env.template to .env")
