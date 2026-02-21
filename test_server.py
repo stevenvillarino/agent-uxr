@@ -2,7 +2,7 @@
 """
 Simple test web server to verify port 8080 works
 """
-
+import os
 from flask import Flask
 
 app = Flask(__name__)
@@ -23,4 +23,7 @@ def test():
 if __name__ == '__main__':
     print("🧪 Starting test server on port 8080...")
     print("🌐 Open http://127.0.0.1:8080 to test")
-    app.run(debug=True, host='127.0.0.1', port=8080)
+
+    # Use environment variable for debug mode, defaulting to False for security
+    debug_mode = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
+    app.run(debug=debug_mode, host='127.0.0.1', port=8080)

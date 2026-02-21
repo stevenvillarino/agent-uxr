@@ -175,4 +175,7 @@ if __name__ == '__main__':
     print("🚀 Starting Agent-UXR Web Interface...")
     print("📝 Real API analysis enabled!")
     print("🌐 Open http://localhost:5000 in your browser")
-    app.run(debug=True, host='127.0.0.1', port=5000)
+
+    # Use environment variable for debug mode, defaulting to False for security
+    debug_mode = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
+    app.run(debug=debug_mode, host='127.0.0.1', port=5000)

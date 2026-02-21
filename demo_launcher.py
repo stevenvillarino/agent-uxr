@@ -176,6 +176,8 @@ if __name__ == '__main__':
     print("=" * 50)
     
     try:
-        app.run(host='0.0.0.0', port=8080, debug=True)
+        # Use environment variable for debug mode, defaulting to False for security
+        debug_mode = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
+        app.run(host='0.0.0.0', port=8080, debug=debug_mode)
     except KeyboardInterrupt:
         print("\n👋 Demo stopped")
