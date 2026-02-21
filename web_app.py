@@ -1553,4 +1553,7 @@ if __name__ == '__main__':
     print("🚀 Starting UXR Synthesizer Web Interface...")
     print("📝 Make sure your OPENAI_API_KEY environment variable is set!")
     print("🌐 Open http://localhost:8080 in your browser")
-    app.run(debug=True, host='0.0.0.0', port=8080)
+
+    # Use environment variable for debug mode, defaulting to False for security
+    debug_mode = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
+    app.run(debug=debug_mode, host='0.0.0.0', port=8080)
