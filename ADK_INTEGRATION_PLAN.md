@@ -124,25 +124,34 @@ root_agent = Agent(
 
 #### Updated Flask Routes:
 ```python
-@app.route('/live-session', methods=['POST'])
-def start_live_session():
-    """Start a live research session with real-time processing"""
-    session_config = request.get_json()
+@app.route('/api/live-session', methods=['POST'])
+def create_live_session():
+    """Create a new ADK-enhanced live research session"""
+    data = request.get_json()
+    session_name = data.get('session_name', 'Untitled Session')
+    research_type = data.get('research_type', 'user_interview')
     
-    # Initialize ADK live session
-    live_session = ResearchSessionAudioRun()
-    session_id = live_session.start_live_session(session_config)
+    session_id = create_adk_enhanced_session(session_name, research_type)
     
     return jsonify({
         'session_id': session_id,
-        'websocket_url': f'ws://localhost:8080/ws/{session_id}',
-        'status': 'live'
+        'websocket_url': f'ws://localhost:8080/ws/live/{session_id}',
+        'status': 'created'
     })
 
-@app.route('/ws/<session_id>')
+@app.route('/api/session/<session_id>/summary')
+def get_session_summary(session_id):
+    """Generate and return a comprehensive session summary"""
+    session = session_manager.get_session(session_id)
+    if session:
+        summary = session.generate_session_summary()
+        return jsonify(summary)
+    return jsonify({'error': 'Session not found'}), 404
+
+@app.route('/ws/live/<session_id>')
 def websocket_handler(session_id):
-    """WebSocket for real-time updates"""
-    # Stream live insights, transcriptions, and visualizations
+    """WebSocket for real-time research session updates"""
+    # Handled by ADKResearchWebSocketHandler
     pass
 ```
 

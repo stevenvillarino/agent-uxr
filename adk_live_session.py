@@ -435,36 +435,6 @@ def create_adk_enhanced_session(session_name: str, research_type: str = "user_in
     
     return session_id
 
-def integrate_with_existing_flask_app():
-    """
-    Integration points with your existing Flask application
-    """
-    
-    # Add new routes to web_app.py:
-    """
-    @app.route('/api/live-session', methods=['POST'])
-    def create_live_session():
-        data = request.get_json()
-        session_name = data.get('session_name', 'Untitled Session')
-        research_type = data.get('research_type', 'user_interview')
-        
-        session_id = create_adk_enhanced_session(session_name, research_type)
-        
-        return jsonify({
-            'session_id': session_id,
-            'websocket_url': f'ws://localhost:8080/ws/live/{session_id}',
-            'status': 'created'
-        })
-    
-    @app.route('/api/session/<session_id>/summary')
-    def get_session_summary(session_id):
-        session = session_manager.get_session(session_id)
-        if session:
-            summary = session.generate_session_summary()
-            return jsonify(summary)
-        return jsonify({'error': 'Session not found'}), 404
-    """
-
 if __name__ == "__main__":
     # Example of how to run the enhanced system
     print("🚀 ADK-Enhanced InsightDeck Agent")
