@@ -55,122 +55,60 @@ def generate_markdown_content(transcript, insights, transcript_info):
     
     return content
 
-def transcribe_with_elevenlabs(audio_file_path, enable_diarization=True):
+def transcribe_with_assemblyai(audio_file_path, enable_diarization=True):
     """
-    Transcribe audio using ElevenLabs Speech-to-Text with speaker diarization.
+    Transcribe audio using AssemblyAI with speaker diarization.
     Returns: dict with transcription results and speaker information
     """
-    api_key = os.getenv('ELEVENLABS_API_KEY')
+    import assemblyai as aai
+
+    api_key = os.getenv('ASSEMBLYAI_API_KEY')
     if not api_key or "your_" in api_key.lower():
-        raise ValueError("ElevenLabs API key not found or still set to placeholder. Please set ELEVENLABS_API_KEY in the .env file.")
-    
-    url = "https://api.elevenlabs.io/v1/speech-to-text/convert"
-    
-    headers = {
-        "xi-api-key": api_key
-    }
-    
+        raise ValueError("AssemblyAI API key not found or still set to placeholder. Please set ASSEMBLYAI_API_KEY in the .env file.")
+
+    aai.settings.api_key = api_key
+
     try:
-        # Prepare form data
-        with open(audio_file_path, 'rb') as audio_file:
-            files = {
-                'audio': (os.path.basename(audio_file_path), audio_file, 'audio/mpeg')
-            }
-            
-            data = {
-                'model': 'eleven_turbo_v2_5',
-                'language': 'en',  # Auto-detect or specify language
-            }
-            
-            # Add diarization parameters if enabled
-            if enable_diarization:
-                data['num_speakers'] = 8  # Up to 8 speakers (adjust as needed)
-                data['diarization_threshold'] = 0.3  # Balance between accuracy and speaker count
-                data['tag_audio_events'] = True  # Include laughter, applause, etc.
-            
-            print("Sending request to ElevenLabs API...")
-            response = requests.post(url, headers=headers, files=files, data=data, timeout=300)
-        
-        # Handle specific error cases
-        if response.status_code == 401:
-            raise Exception("ElevenLabs API authentication failed. Please check your API key.")
-        elif response.status_code == 403:
-            raise Exception("ElevenLabs API access denied. Your API key doesn't have Speech-to-Text permissions. Please upgrade your plan or contact ElevenLabs support.")
-        elif response.status_code == 429:
-            raise Exception("ElevenLabs API rate limit exceeded. Please try again later.")
-        elif response.status_code != 200:
-            error_detail = ""
-            try:
-                error_json = response.json()
-                error_detail = f" - {error_json.get('detail', 'Unknown error')}"
-            except:
-                error_detail = f" - {response.text}"
-            raise Exception(f"ElevenLabs API error: {response.status_code}{error_detail}")
-        
-        result = response.json()
-        
-        # Parse the response to extract speaker information
-        transcript_text = ""
-        speaker_segments = []
-        
-        if 'text' in result:
-            transcript_text = result['text']
-        
-        # Parse words with speaker information
-        if 'words' in result and result['words']:
-            current_speaker = None
-            current_segment = ""
-            
-            for word_info in result['words']:
-                word = word_info.get('text', '')
-                speaker_id = word_info.get('speaker_id')
-                
-                if speaker_id != current_speaker:
-                    # Save previous segment
-                    if current_segment.strip():
-                        speaker_segments.append({
-                            'speaker': f"Speaker {current_speaker}" if current_speaker else "Unknown",
-                            'text': current_segment.strip()
-                        })
-                    
-                    # Start new segment
-                    current_speaker = speaker_id
-                    current_segment = word
-                else:
-                    current_segment += " " + word
-            
-            # Add the last segment
-            if current_segment.strip():
-                speaker_segments.append({
-                    'speaker': f"Speaker {current_speaker}" if current_speaker else "Unknown",
-                    'text': current_segment.strip()
-                })
-        
-        # Format transcript with speakers if available
-        if speaker_segments and enable_diarization:
+        config = aai.TranscriptionConfig(
+            speaker_labels=enable_diarization,
+            language_detection=True
+        )
+
+        print("Sending request to AssemblyAI API...")
+        transcript = aai.Transcriber().transcribe(audio_file_path, config=config)
+
+        if transcript.status == aai.TranscriptStatus.error:
+            raise Exception(f"AssemblyAI transcription error: {transcript.error}")
+
+        # Format transcript with speaker labels if available
+        if enable_diarization and transcript.utterances:
             formatted_transcript = ""
-            for segment in speaker_segments:
-                formatted_transcript += f"[{segment['speaker']}]: {segment['text']}\n\n"
+            for utterance in transcript.utterances:
+                formatted_transcript += f"[Speaker {utterance.speaker}]: {utterance.text}\n\n"
             transcript_text = formatted_transcript
-        
+            unique_speakers = {u.speaker for u in transcript.utterances}
+            has_speakers = True
+            speaker_count = len(unique_speakers)
+        else:
+            transcript_text = transcript.text or ""
+            has_speakers = False
+            speaker_count = 0
+
+        language = getattr(transcript, 'language_code', None) or 'unknown'
+
         return {
             'text': transcript_text,
-            'has_speakers': bool(speaker_segments and enable_diarization),
-            'speaker_count': len(set(word.get('speaker_id') for word in result.get('words', []) if word.get('speaker_id'))) if enable_diarization else 0,
-            'service': 'elevenlabs',
-            'language': result.get('language_code', 'unknown')
+            'has_speakers': has_speakers,
+            'speaker_count': speaker_count,
+            'service': 'AssemblyAI',
+            'language': language
         }
-    
-    except requests.exceptions.Timeout:
-        raise Exception("ElevenLabs API request timed out. The audio file might be too large or the service is busy.")
-    except requests.exceptions.RequestException as e:
-        raise Exception(f"Network error while connecting to ElevenLabs API: {str(e)}")
+
     except Exception as e:
-        # Re-raise our custom exceptions
-        if "ElevenLabs API" in str(e):
+        if "AssemblyAI" in str(e):
             raise e
         else:
-            raise Exception(f"Error processing ElevenLabs transcription: {str(e)}")
+            raise Exception(f"AssemblyAI transcription failed: {str(e)}")
 
 
 def get_file_size_mb(file_path):
@@ -504,17 +442,17 @@ def transcribe_only():
                     print(f"Using service: {service_type}")
                     
                     try:
-                        if service_type == 'elevenlabs' and enable_diarization:
-                            print("Transcribing with ElevenLabs (speaker diarization enabled)...")
-                            result = transcribe_with_elevenlabs(audio_file_path, enable_diarization=True)
+                        if service_type == 'assemblyai':
+                            print("Transcribing with AssemblyAI (speaker diarization enabled)...")
+                            result = transcribe_with_assemblyai(audio_file_path, enable_diarization=True)
                             text_content = result['text']
                             transcription_info = {
-                                'service': 'ElevenLabs',
+                                'service': 'AssemblyAI',
                                 'has_speakers': result.get('has_speakers', False),
                                 'speaker_count': result.get('speaker_count', 0),
                                 'language': result.get('language', 'unknown')
                             }
-                            print(f"ElevenLabs transcription completed: {len(text_content)} characters")
+                            print(f"AssemblyAI transcription completed: {len(text_content)} characters")
                             if result.get('has_speakers'):
                                 print(f"Speaker diarization: {result.get('speaker_count', 0)} speakers detected")
                         else:
@@ -603,7 +541,7 @@ def process_transcript():
     """Process uploaded transcript or audio file and return insights."""
     try:
         # Get processing options
-        service_type = request.form.get('service_type', 'whisper')  # 'whisper' or 'elevenlabs'
+        service_type = request.form.get('service_type', 'whisper')  # 'whisper' or 'assemblyai'
         enable_diarization = request.form.get('enable_diarization', 'false').lower() == 'true'
         
         # Get the uploaded content
@@ -636,20 +574,20 @@ def process_transcript():
                     print(f"📁 Very large file - will use local Whisper processing (may take longer)")
                 
                 try:
-                    if service_type == 'elevenlabs' and enable_diarization:
-                        print("Transcribing with ElevenLabs (speaker diarization enabled)...")
-                        result = transcribe_with_elevenlabs(audio_file_path, enable_diarization=True)
+                    if service_type == 'assemblyai':
+                        print("Transcribing with AssemblyAI (speaker diarization enabled)...")
+                        result = transcribe_with_assemblyai(audio_file_path, enable_diarization=True)
                         text_content = result['text']
                         transcription_info = {
-                            'service': 'ElevenLabs',
+                            'service': 'AssemblyAI',
                             'has_speakers': result.get('has_speakers', False),
                             'speaker_count': result.get('speaker_count', 0),
                             'language': result.get('language', 'unknown')
                         }
-                        print(f"ElevenLabs transcription completed: {len(text_content)} characters")
+                        print(f"AssemblyAI transcription completed: {len(text_content)} characters")
                         if result.get('has_speakers'):
                             print(f"Speaker diarization: {result.get('speaker_count', 0)} speakers detected")
-                    
+
                     else:
                         # Use smart Whisper processing (handles all file sizes)
                         print("Transcribing with smart Whisper processing...")
@@ -1182,13 +1120,13 @@ def process_demo():
             transcript = f.read()
         
         # Process the transcript (simulate the selected service)
-        if service_type == 'elevenlabs':
-            # Format as if it came from ElevenLabs with speakers
+        if service_type == 'assemblyai':
+            # Format as if it came from AssemblyAI with speakers
             transcript_data = {
                 'transcript': transcript,
                 'has_speakers': True,
                 'speaker_count': len(set(re.findall(r'^([^:]+):', transcript, re.MULTILINE))),
-                'service': 'ElevenLabs (Demo)',
+                'service': 'AssemblyAI (Demo)',
                 'language': 'en'
             }
         else:
@@ -1233,23 +1171,23 @@ def process_demo():
 def get_config():
     """Get current configuration status."""
     openai_key = os.getenv('OPENAI_API_KEY', '')
-    elevenlabs_key = os.getenv('ELEVENLABS_API_KEY', '')
-    
+    assemblyai_key = os.getenv('ASSEMBLYAI_API_KEY', '')
+
     # Mask keys for security (show only first 8 and last 4 characters)
     openai_masked = ''
-    elevenlabs_masked = ''
-    
+    assemblyai_masked = ''
+
     if openai_key and len(openai_key) > 12:
         openai_masked = openai_key[:8] + '...' + openai_key[-4:]
-    
-    if elevenlabs_key and len(elevenlabs_key) > 12:
-        elevenlabs_masked = elevenlabs_key[:8] + '...' + elevenlabs_key[-4:]
-    
+
+    if assemblyai_key and len(assemblyai_key) > 12:
+        assemblyai_masked = assemblyai_key[:8] + '...' + assemblyai_key[-4:]
+
     return jsonify({
         'openai_configured': bool(openai_key and "your_" not in openai_key.lower()),
-        'elevenlabs_configured': bool(elevenlabs_key and "your_" not in elevenlabs_key.lower()),
+        'assemblyai_configured': bool(assemblyai_key and "your_" not in assemblyai_key.lower()),
         'openai_key_preview': openai_masked,
-        'elevenlabs_key_preview': elevenlabs_masked
+        'assemblyai_key_preview': assemblyai_masked
     })
 
 @app.route('/api/config', methods=['POST'])
@@ -1258,40 +1196,40 @@ def save_config():
     try:
         data = request.get_json()
         openai_key = data.get('openai_key', '').strip()
-        elevenlabs_key = data.get('elevenlabs_key', '').strip()
-        
+        assemblyai_key = data.get('assemblyai_key', '').strip()
+
         # Update environment variables
         if openai_key:
             os.environ['OPENAI_API_KEY'] = openai_key
-        if elevenlabs_key:
-            os.environ['ELEVENLABS_API_KEY'] = elevenlabs_key
-        
+        if assemblyai_key:
+            os.environ['ASSEMBLYAI_API_KEY'] = assemblyai_key
+
         # Update .env file
         env_path = '.env'
         env_content = []
-        
+
         # Read existing .env file
         if os.path.exists(env_path):
             with open(env_path, 'r') as f:
                 env_content = f.readlines()
-        
+
         # Update or add keys
         openai_updated = False
-        elevenlabs_updated = False
-        
+        assemblyai_updated = False
+
         for i, line in enumerate(env_content):
             if line.startswith('OPENAI_API_KEY=') and openai_key:
                 env_content[i] = f'OPENAI_API_KEY={openai_key}\n'
                 openai_updated = True
-            elif line.startswith('ELEVENLABS_API_KEY=') and elevenlabs_key:
-                env_content[i] = f'ELEVENLABS_API_KEY={elevenlabs_key}\n'
-                elevenlabs_updated = True
-        
+            elif line.startswith('ASSEMBLYAI_API_KEY=') and assemblyai_key:
+                env_content[i] = f'ASSEMBLYAI_API_KEY={assemblyai_key}\n'
+                assemblyai_updated = True
+
         # Add new keys if not found
         if openai_key and not openai_updated:
             env_content.append(f'OPENAI_API_KEY={openai_key}\n')
-        if elevenlabs_key and not elevenlabs_updated:
-            env_content.append(f'ELEVENLABS_API_KEY={elevenlabs_key}\n')
+        if assemblyai_key and not assemblyai_updated:
+            env_content.append(f'ASSEMBLYAI_API_KEY={assemblyai_key}\n')
         
         # Write updated .env file
         with open(env_path, 'w') as f:
@@ -1335,37 +1273,38 @@ def test_openai():
     except Exception as e:
         return jsonify({'error': f'OpenAI API test failed: {str(e)}'})
 
-@app.route('/api/test-elevenlabs', methods=['POST'])
-def test_elevenlabs():
-    """Test ElevenLabs API connectivity."""
+@app.route('/api/test-assemblyai', methods=['POST'])
+def test_assemblyai():
+    """Test AssemblyAI API connectivity."""
     try:
         data = request.get_json()
         api_key = data.get('api_key', '').strip()
-        
+
         if not api_key:
-            api_key = os.getenv('ELEVENLABS_API_KEY', '')
-        
+            api_key = os.getenv('ASSEMBLYAI_API_KEY', '')
+
         if not api_key or "your_" in api_key.lower():
-            return jsonify({'error': 'No valid ElevenLabs API key provided'})
-        
-        # Test the API key with a simple request to get user info
-        headers = {'xi-api-key': api_key}
-        response = requests.get('https://api.elevenlabs.io/v1/user', headers=headers)
-        
+            return jsonify({'error': 'No valid AssemblyAI API key provided'})
+
+        # Test the API key with a lightweight read-only request
+        response = requests.get(
+            'https://api.assemblyai.com/v2/transcript?limit=1',
+            headers={'authorization': api_key}
+        )
+
         if response.status_code == 200:
-            user_data = response.json()
             return jsonify({
                 'success': True,
-                'message': 'ElevenLabs API connection successful',
-                'subscription': user_data.get('subscription', {}).get('tier', 'unknown'),
-                'character_count': user_data.get('subscription', {}).get('character_count', 0),
-                'character_limit': user_data.get('subscription', {}).get('character_limit', 0)
+                'message': 'AssemblyAI API connection successful',
+                'plan': 'Active'
             })
+        elif response.status_code == 401:
+            return jsonify({'error': 'AssemblyAI API key is invalid or unauthorized'})
         else:
-            return jsonify({'error': f'ElevenLabs API test failed: HTTP {response.status_code}'})
-        
+            return jsonify({'error': f'AssemblyAI API test failed: HTTP {response.status_code}'})
+
     except Exception as e:
-        return jsonify({'error': f'ElevenLabs API test failed: {str(e)}'})
+        return jsonify({'error': f'AssemblyAI API test failed: {str(e)}'})
 
 @app.route('/api/combine-batch', methods=['POST'])
 def combine_batch():

@@ -70,63 +70,62 @@ def get_insights_from_llm(text_content: str, transcription_info: dict = None) ->
     Sends the transcript to an LLM to extract a summary and key themes.
     Enhanced to handle speaker information if available.
     """
-    # Enhanced prompt for UX-focused analysis
+    # Researcher-as-synthesizer prompt for UX-focused analysis
     if transcription_info and transcription_info.get("has_diarization"):
         system_prompt = """
-        You are a senior UX researcher with expertise in user experience design and behavioral analysis.
-        
-        Analyze this user research transcript with speaker identification. Focus on extracting specific, actionable UX insights:
-        
-        ANALYZE FOR:
-        - User pain points and specific frustrations mentioned
-        - Usability issues and interface problems
-        - User goals, motivations, and mental models
-        - Feature requests and improvement suggestions
-        - Accessibility concerns or barriers
-        - Workflow inefficiencies and friction points
-        - Positive user experiences and what works well
-        
-        AVOID generic statements. Be specific to what users actually said.
-        
-        Return JSON with:
-        - "summary": Executive summary highlighting critical UX findings (2-3 sentences)
-        - "themes": 4-6 specific, actionable UX themes (not generic statements)
-        - "pain_points": Top 3-5 specific user frustrations mentioned
-        - "recommendations": 3-4 concrete UX improvements prioritized by impact
-        - "speaker_insights": Key insights organized by speaker role if multiple speakers
-        """
+You are a senior UX researcher who just finished facilitating this research session. You were in the room. You heard everything. Now you're sitting down to synthesize your notes into insights your team can act on.
+
+Your job is to think like a researcher doing a debrief — not to summarize what happened, but to interpret what it means. Cluster observations into patterns. Name the tensions you noticed. Surface the moments where user behavior revealed something surprising or significant.
+
+As you read through this transcript, actively look for:
+- Where did participants struggle or hesitate, and what does that reveal about their mental model?
+- What did they say they wanted vs. what their behavior suggests they actually need?
+- Which frustrations came up more than once — even if phrased differently each time?
+- What assumptions did participants bring into the session that the product violates?
+- Where did participants express delight, confidence, or relief — and why?
+- How did the conversation differ across speakers — do participants agree, or are there competing needs?
+
+Write as if you're presenting this to your product team. Be direct. Be specific. Ground every claim in what participants actually said or did. Avoid generic UX language — if the insight could apply to any product, it's not a real insight.
+
+BAD: "Users want better navigation."
+GOOD: "Participants repeatedly confused 'Analytics' and 'Insights' as separate destinations — one said 'I don't know what the difference is, they sound like the same thing' — pointing to a labeling problem rooted in internal terminology bleeding into the UI."
+
+Return a JSON object with:
+- "summary": Your 2-3 sentence research debrief — what's the headline finding and why it matters
+- "themes": 4-6 research themes, each written as an insight (what you observed + what it means + a participant quote or example as evidence)
+- "pain_points": Top 3-5 friction points grounded in specific participant moments or direct quotes
+- "recommendations": 3-4 design opportunities directly tied to what you heard — prioritized by frequency and severity of the underlying problem
+- "speaker_insights": What each distinct voice contributed — areas of agreement, tension, or divergence across participants
+- "user_quotes": 5-8 verbatim quotes that best capture the research story — choose quotes that reveal mindset, not just preference
+"""
     else:
         system_prompt = """
-        You are a senior UX researcher with expertise in user experience design and behavioral analysis.
-        
-        Analyze this user research transcript and extract specific, actionable UX insights grounded in what users actually said:
-        
-        CRITICAL ANALYSIS REQUIREMENTS:
-        1. QUOTE ACTUAL USER WORDS - Include direct quotes that support each insight
-        2. BE SPECIFIC - Avoid generic UX statements like "users want better navigation"
-        3. IDENTIFY ROOT CAUSES - Don't just list complaints, explain the underlying UX problems
-        4. PRIORITIZE BY IMPACT - Focus on issues that affect core user workflows
-        
-        ANALYZE FOR:
-        - Specific usability failures: "I clicked X expecting Y but got Z"
-        - Emotional reactions: frustration, confusion, delight expressed by users
-        - Mental model mismatches: where user expectations don't match interface behavior
-        - Workflow interruptions: specific points where users get stuck or lose efficiency
-        - Feature gaps: explicit requests for missing functionality
-        - Accessibility barriers: any mention of difficulty seeing, hearing, or interacting
-        - Success moments: what specifically works well and why
-        
-        EXAMPLE FORMAT FOR INSIGHTS:
-        Instead of: "Users want better navigation"
-        Write: "Users confused by 'Analytics' vs 'Insights' tabs - participant said 'I don't know what the difference is between Analytics and Insights - those feel like they could be the same thing' - suggests navigation taxonomy needs clarification"
-        
-        Return JSON with:
-        - "summary": 2-3 sentences highlighting the most critical UX findings with user impact
-        - "themes": 4-6 specific UX themes, each with supporting user quotes or examples
-        - "pain_points": Top 3-5 specific frustrations with exact user quotes
-        - "recommendations": 3-4 concrete UX improvements with rationale tied to user feedback
-        - "user_quotes": 5-8 most revealing direct quotes that illustrate key insights
-        """
+You are a senior UX researcher who just finished facilitating this research session. You were in the room. You heard everything. Now you're sitting down to synthesize your notes into insights your team can act on.
+
+Your job is to think like a researcher doing a debrief — not to summarize what happened, but to interpret what it means. Cluster observations into patterns. Name the tensions. Surface the moments where user behavior revealed something surprising or significant.
+
+Approach this the way you'd run an affinity exercise: start with what participants said and did, then ask "what does this tell us about how they think, what they expect, and where the product is working against them?"
+
+As you read through this transcript, actively look for:
+- Where did participants struggle, hesitate, or go off-script — and what does that reveal?
+- What did they say they wanted vs. what their behavior suggests they actually need?
+- Which frustrations appeared more than once — even if phrased differently?
+- What assumptions did participants bring that the product currently violates?
+- Where did participants feel confident, relieved, or successful — and why?
+- What is NOT being said that a researcher would notice as a gap?
+
+Write as if you're presenting this to your product team in a research readout. Be direct. Be specific. Every insight should trace back to something a participant said or did. Avoid generic UX language — if it could apply to any product, it's not a real insight.
+
+BAD: "Users want better navigation."
+GOOD: "Participants repeatedly confused 'Analytics' and 'Insights' as separate destinations — one said 'I don't know what the difference is, they sound like the same thing' — pointing to a labeling problem rooted in internal terminology bleeding into the UI."
+
+Return a JSON object with:
+- "summary": Your 2-3 sentence research debrief — what's the headline finding and why it matters for the product
+- "themes": 4-6 research themes, each written as an insight (observation + interpretation + evidence from the session)
+- "pain_points": Top 3-5 friction points grounded in specific participant moments or direct quotes
+- "recommendations": 3-4 design opportunities directly tied to what you heard — prioritized by how often and how severely the underlying problem came up
+- "user_quotes": 5-8 verbatim quotes that best capture the research story — choose quotes that reveal mindset, not just preference
+"""
     
     try:
         response = client.chat.completions.create(
